@@ -1,0 +1,32 @@
+# --- Xcode ---
+# User-specific files (breakpoints, window positions, etc.)
+xcuserdata/
+
+# Build artifacts
+build/
+DerivedData/
+
+# --- Swift Package Manager ---
+# Ignore the build folder for dependencies
+.build/
+.swiftpm/
+
+# --- macOS ---
+# System files
+.DS_Store
+*.swp
+*.lock
+
+# --- Persistence (SwiftData/CoreData) ---
+# If you ever run tests that generate local SQLite files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# --- Fastlane / Distribution ---
+# If you eventually automate your releases
+fastlane/report.xml
+fastlane/Preview.html
+*.ipa
+*.app
+*.dSYM.zip
