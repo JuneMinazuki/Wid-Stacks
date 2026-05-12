@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		150AF81B2FB2C4CC00B0DC59 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 150AF81A2FB2C4CC00B0DC59 /* WidgetKit.framework */; };
+		150AF81D2FB2C4CC00B0DC59 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 150AF81C2FB2C4CC00B0DC59 /* SwiftUI.framework */; };
+		150AF82A2FB2C4CD00B0DC59 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		150AF7DC2FB2C3D000B0DC59 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,13 +27,47 @@
 			remoteGlobalIDString = 150AF7CB2FB2C3CE00B0DC59;
 			remoteInfo = "Wid-Stacks";
 		};
+		150AF8282FB2C4CD00B0DC59 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 150AF7C42FB2C3CE00B0DC59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 150AF8172FB2C4CC00B0DC59;
+			remoteInfo = WidgetsExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		150AF82B2FB2C4CD00B0DC59 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				150AF82A2FB2C4CD00B0DC59 /* WidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		150AF7CC2FB2C3CE00B0DC59 /* Wid-Stacks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Wid-Stacks.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		150AF7DB2FB2C3D000B0DC59 /* Wid-StacksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Wid-StacksTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		150AF7E52FB2C3D000B0DC59 /* Wid-StacksUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Wid-StacksUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		150AF81A2FB2C4CC00B0DC59 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
+		150AF81C2FB2C4CC00B0DC59 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		150AF82E2FB2C4CD00B0DC59 /* Exceptions for "Widgets" folder in "WidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 150AF8172FB2C4CC00B0DC59 /* WidgetsExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		150AF7CE2FB2C3CE00B0DC59 /* Wid-Stacks */ = {
@@ -43,6 +83,14 @@
 		150AF7E82FB2C3D000B0DC59 /* Wid-StacksUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "Wid-StacksUITests";
+			sourceTree = "<group>";
+		};
+		150AF81E2FB2C4CC00B0DC59 /* Widgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				150AF82E2FB2C4CD00B0DC59 /* Exceptions for "Widgets" folder in "WidgetsExtension" target */,
+			);
+			path = Widgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,6 +117,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		150AF8152FB2C4CC00B0DC59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				150AF81D2FB2C4CC00B0DC59 /* SwiftUI.framework in Frameworks */,
+				150AF81B2FB2C4CC00B0DC59 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -78,6 +135,8 @@
 				150AF7CE2FB2C3CE00B0DC59 /* Wid-Stacks */,
 				150AF7DE2FB2C3D000B0DC59 /* Wid-StacksTests */,
 				150AF7E82FB2C3D000B0DC59 /* Wid-StacksUITests */,
+				150AF81E2FB2C4CC00B0DC59 /* Widgets */,
+				150AF8192FB2C4CC00B0DC59 /* Frameworks */,
 				150AF7CD2FB2C3CE00B0DC59 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,8 +147,18 @@
 				150AF7CC2FB2C3CE00B0DC59 /* Wid-Stacks.app */,
 				150AF7DB2FB2C3D000B0DC59 /* Wid-StacksTests.xctest */,
 				150AF7E52FB2C3D000B0DC59 /* Wid-StacksUITests.xctest */,
+				150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		150AF8192FB2C4CC00B0DC59 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				150AF81A2FB2C4CC00B0DC59 /* WidgetKit.framework */,
+				150AF81C2FB2C4CC00B0DC59 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,10 +171,12 @@
 				150AF7C82FB2C3CE00B0DC59 /* Sources */,
 				150AF7C92FB2C3CE00B0DC59 /* Frameworks */,
 				150AF7CA2FB2C3CE00B0DC59 /* Resources */,
+				150AF82B2FB2C4CD00B0DC59 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				150AF8292FB2C4CD00B0DC59 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				150AF7CE2FB2C3CE00B0DC59 /* Wid-Stacks */,
@@ -163,6 +234,28 @@
 			productReference = 150AF7E52FB2C3D000B0DC59 /* Wid-StacksUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		150AF8172FB2C4CC00B0DC59 /* WidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 150AF82F2FB2C4CD00B0DC59 /* Build configuration list for PBXNativeTarget "WidgetsExtension" */;
+			buildPhases = (
+				150AF8142FB2C4CC00B0DC59 /* Sources */,
+				150AF8152FB2C4CC00B0DC59 /* Frameworks */,
+				150AF8162FB2C4CC00B0DC59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				150AF81E2FB2C4CC00B0DC59 /* Widgets */,
+			);
+			name = WidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = WidgetsExtension;
+			productReference = 150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -184,6 +277,9 @@
 						CreatedOnToolsVersion = 26.4.1;
 						TestTargetID = 150AF7CB2FB2C3CE00B0DC59;
 					};
+					150AF8172FB2C4CC00B0DC59 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
 				};
 			};
 			buildConfigurationList = 150AF7C72FB2C3CE00B0DC59 /* Build configuration list for PBXProject "Wid-Stacks" */;
@@ -203,6 +299,7 @@
 				150AF7CB2FB2C3CE00B0DC59 /* Wid-Stacks */,
 				150AF7DA2FB2C3D000B0DC59 /* Wid-StacksTests */,
 				150AF7E42FB2C3D000B0DC59 /* Wid-StacksUITests */,
+				150AF8172FB2C4CC00B0DC59 /* WidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -223,6 +320,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		150AF7E32FB2C3D000B0DC59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		150AF8162FB2C4CC00B0DC59 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -253,6 +357,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		150AF8142FB2C4CC00B0DC59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -265,6 +376,11 @@
 			isa = PBXTargetDependency;
 			target = 150AF7CB2FB2C3CE00B0DC59 /* Wid-Stacks */;
 			targetProxy = 150AF7E62FB2C3D000B0DC59 /* PBXContainerItemProxy */;
+		};
+		150AF8292FB2C4CD00B0DC59 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 150AF8172FB2C4CC00B0DC59 /* WidgetsExtension */;
+			targetProxy = 150AF8282FB2C4CD00B0DC59 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -565,6 +681,86 @@
 			};
 			name = Release;
 		};
+		150AF82C2FB2C4CD00B0DC59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Widgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.juneminazuki.Wid-Stacks.Widgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Debug;
+		};
+		150AF82D2FB2C4CD00B0DC59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Widgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.juneminazuki.Wid-Stacks.Widgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -600,6 +796,15 @@
 			buildConfigurations = (
 				150AF7F62FB2C3D000B0DC59 /* Debug */,
 				150AF7F72FB2C3D000B0DC59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		150AF82F2FB2C4CD00B0DC59 /* Build configuration list for PBXNativeTarget "WidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				150AF82C2FB2C4CD00B0DC59 /* Debug */,
+				150AF82D2FB2C4CD00B0DC59 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
