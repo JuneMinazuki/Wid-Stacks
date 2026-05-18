@@ -10,6 +10,10 @@
 		150AF81B2FB2C4CC00B0DC59 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 150AF81A2FB2C4CC00B0DC59 /* WidgetKit.framework */; };
 		150AF81D2FB2C4CC00B0DC59 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 150AF81C2FB2C4CC00B0DC59 /* SwiftUI.framework */; };
 		150AF82A2FB2C4CD00B0DC59 /* WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		151B51D52FBD62C60090143B /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151B51D12FBD62C60090143B /* ToDoItem.swift */; };
+		151B51D62FBD62C60090143B /* ToDoIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151B51CF2FBD62C60090143B /* ToDoIntent.swift */; };
+		151B51D72FBD62C60090143B /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151B51D12FBD62C60090143B /* ToDoItem.swift */; };
+		151B51D82FBD62C60090143B /* ToDoIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151B51CF2FBD62C60090143B /* ToDoIntent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,11 +61,13 @@
 		150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		150AF81A2FB2C4CC00B0DC59 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
 		150AF81C2FB2C4CC00B0DC59 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
+		151B51CF2FBD62C60090143B /* ToDoIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoIntent.swift; sourceTree = "<group>"; };
+		151B51D12FBD62C60090143B /* ToDoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItem.swift; sourceTree = "<group>"; };
 		15541AF12FBCBEBC000BB94B /* WidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetsExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		150AF82E2FB2C4CD00B0DC59 /* Exceptions for "Widgets" folder in "WidgetsExtension" target */ = {
+		150AF82E2FB2C4CD00B0DC59 /* Exceptions for "Wid-StacksWidgets" folder in "WidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -86,12 +92,12 @@
 			path = "Wid-StacksUITests";
 			sourceTree = "<group>";
 		};
-		150AF81E2FB2C4CC00B0DC59 /* Widgets */ = {
+		150AF81E2FB2C4CC00B0DC59 /* Wid-StacksWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				150AF82E2FB2C4CD00B0DC59 /* Exceptions for "Widgets" folder in "WidgetsExtension" target */,
+				150AF82E2FB2C4CD00B0DC59 /* Exceptions for "Wid-StacksWidgets" folder in "WidgetsExtension" target */,
 			);
-			path = Widgets;
+			path = "Wid-StacksWidgets";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -137,7 +143,8 @@
 				150AF7CE2FB2C3CE00B0DC59 /* Wid-Stacks */,
 				150AF7DE2FB2C3D000B0DC59 /* Wid-StacksTests */,
 				150AF7E82FB2C3D000B0DC59 /* Wid-StacksUITests */,
-				150AF81E2FB2C4CC00B0DC59 /* Widgets */,
+				150AF81E2FB2C4CC00B0DC59 /* Wid-StacksWidgets */,
+				151B51D42FBD62C60090143B /* Shared */,
 				150AF8192FB2C4CC00B0DC59 /* Frameworks */,
 				150AF7CD2FB2C3CE00B0DC59 /* Products */,
 			);
@@ -161,6 +168,39 @@
 				150AF81C2FB2C4CC00B0DC59 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		151B51D02FBD62C60090143B /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				151B51CF2FBD62C60090143B /* ToDoIntent.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		151B51D22FBD62C60090143B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				151B51D12FBD62C60090143B /* ToDoItem.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		151B51D32FBD62C60090143B /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		151B51D42FBD62C60090143B /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				151B51D02FBD62C60090143B /* Intents */,
+				151B51D22FBD62C60090143B /* Models */,
+				151B51D32FBD62C60090143B /* Storage */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,7 +289,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				150AF81E2FB2C4CC00B0DC59 /* Widgets */,
+				150AF81E2FB2C4CC00B0DC59 /* Wid-StacksWidgets */,
 			);
 			name = WidgetsExtension;
 			packageProductDependencies = (
@@ -342,6 +382,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				151B51D72FBD62C60090143B /* ToDoItem.swift in Sources */,
+				151B51D82FBD62C60090143B /* ToDoIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,6 +405,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				151B51D52FBD62C60090143B /* ToDoItem.swift in Sources */,
+				151B51D62FBD62C60090143B /* ToDoIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
