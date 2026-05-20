@@ -20,11 +20,16 @@ struct TodoProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (WidgetKit.Timeline<TodoEntry>) -> Void) {
-        // Run the midnight cleanup before rendering data
+        // Run midnight cleanup
         TodoStore.shared.purgeOldCompletedItems()
         
+        // Get fresh data
         let entries = [TodoEntry(date: Date(), todos: TodoStore.shared.getTodos())]
-        let timeline = WidgetKit.Timeline(entries: entries, policy: .after(Date().addingTimeInterval(900))) // Refresh every 15 min
+        
+        // Refresh exactly at midnight
+        let midnight = Calendar.current.startOfDay(for: Date().addingTimeInterval(86400))
+        let timeline = WidgetKit.Timeline(entries: entries, policy: .after(midnight))
+        
         completion(timeline)
     }
 }

@@ -58,7 +58,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		150AF7CC2FB2C3CE00B0DC59 /* Wid-Stacks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Wid-Stacks.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		150AF7CC2FB2C3CE00B0DC59 /* WidStacks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WidStacks.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		150AF7DB2FB2C3D000B0DC59 /* Wid-StacksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Wid-StacksTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		150AF7E52FB2C3D000B0DC59 /* Wid-StacksUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Wid-StacksUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -159,7 +159,7 @@
 		150AF7CD2FB2C3CE00B0DC59 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				150AF7CC2FB2C3CE00B0DC59 /* Wid-Stacks.app */,
+				150AF7CC2FB2C3CE00B0DC59 /* WidStacks.app */,
 				150AF7DB2FB2C3D000B0DC59 /* Wid-StacksTests.xctest */,
 				150AF7E52FB2C3D000B0DC59 /* Wid-StacksUITests.xctest */,
 				150AF8182FB2C4CC00B0DC59 /* WidgetsExtension.appex */,
@@ -243,7 +243,7 @@
 			packageProductDependencies = (
 			);
 			productName = "Wid-Stacks";
-			productReference = 150AF7CC2FB2C3CE00B0DC59 /* Wid-Stacks.app */;
+			productReference = 150AF7CC2FB2C3CE00B0DC59 /* WidStacks.app */;
 			productType = "com.apple.product-type.application";
 		};
 		150AF7DA2FB2C3D000B0DC59 /* Wid-StacksTests */ = {
@@ -594,7 +594,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.juneminazuki.Wid-Stacks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = WidStacks;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -640,7 +640,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.juneminazuki.Wid-Stacks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = WidStacks;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
