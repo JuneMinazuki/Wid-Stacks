@@ -1,6 +1,8 @@
 # --- Xcode ---
 # User-specific files (breakpoints, window positions, etc.)
 xcuserdata/
+DerivedData/
+*.xcuserstate
 
 # Build artifacts
 build/
