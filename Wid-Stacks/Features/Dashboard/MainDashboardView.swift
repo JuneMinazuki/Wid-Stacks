@@ -2,7 +2,7 @@ import SwiftUI
 import WidgetKit
 
 struct MainDashboardView: View {
-    @State private var todos: [TodoItem] = TodoStore.shared.getTodos()
+    @State private var todos: [TodoItem] = []
     @State private var showAddTaskSheet = false
     @State private var newTaskTitle = ""
 
@@ -21,6 +21,8 @@ struct MainDashboardView: View {
                         HStack {
                             Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
                             Text(todo.title)
+                                .strikethrough(todo.isCompleted)
+                                .foregroundColor(todo.isCompleted ? .secondary : .primary)
                         }
                     }
                 }
@@ -31,11 +33,16 @@ struct MainDashboardView: View {
                     Image(systemName: "plus")
                 }
             }
-            // Listen for deep links coming from the widget
+            // Refresh the list whenever the app comes into view
+            .onAppear {
+                refreshData()
+            }
             .onOpenURL { url in
                 if url.absoluteString == "todo://add" {
                     showAddTaskSheet = true
                 }
+                // Always pull latest data
+                refreshData()
             }
             .sheet(isPresented: $showAddTaskSheet) {
                 NavigationStack {
@@ -45,12 +52,14 @@ struct MainDashboardView: View {
                     .navigationTitle("Add New Task")
                     .toolbar {
                         Button("Save") {
-                            let newItem = TodoItem(id: UUID(), title: newTaskTitle, isCompleted: false)
-                            todos.append(newItem)
-                            TodoStore.shared.saveTodos(todos)
-                            WidgetCenter.shared.reloadAllTimelines()
+                            let newItem = TodoItem(title: newTaskTitle)
+                            var currentTodos = TodoStore.shared.getTodos()
+                            currentTodos.append(newItem)
+                            TodoStore.shared.saveTodos(currentTodos)
+                            
                             newTaskTitle = ""
                             showAddTaskSheet = false
+                            refreshData()
                         }
                     }
                 }
