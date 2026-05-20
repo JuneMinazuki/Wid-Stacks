@@ -1,7 +1,7 @@
 import AppIntents
 import WidgetKit
 
-struct ToggleToDoIntent: AppIntent {
+struct ToggleTodoIntent: AppIntent {
     static var title: LocalizedStringResource = "Toggle Todo Item"
     
     @Parameter(title: "Item ID")
