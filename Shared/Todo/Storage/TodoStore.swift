@@ -1,6 +1,7 @@
 import Foundation
 import WidgetKit
 
+@MainActor
 class TodoStore {
     static let shared = TodoStore()
     private let sharedSuiteName = "group.com.juneminazuki.Wid-Stacks"

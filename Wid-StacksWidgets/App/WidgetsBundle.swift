@@ -9,6 +9,7 @@ struct AppWidgetBundle: WidgetBundle {
 }
 
 // Simple Timeline Provider for the Todo Widget
+@MainActor
 struct TodoProvider: TimelineProvider {
     func placeholder(in context: Context) -> TodoEntry {
         TodoEntry(date: Date(), todos: [TodoItem(id: UUID(), title: "Sample Task", isCompleted: false)])

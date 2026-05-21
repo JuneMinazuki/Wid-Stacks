@@ -13,6 +13,7 @@ struct ToggleTodoIntent: AppIntent {
         self.id = id.uuidString
     }
 
+    @MainActor
     func perform() async throws -> some IntentResult {
         var todos = TodoStore.shared.getTodos()
         if let uuid = UUID(uuidString: id),
