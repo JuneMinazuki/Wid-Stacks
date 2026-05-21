@@ -1,74 +1,59 @@
 import SwiftUI
-import WidgetKit
 
 struct MainDashboardView: View {
-    @State private var todos: [TodoItem] = []
-    @State private var showAddTaskSheet = false
-    @State private var newTaskTitle = ""
-
-    var body: some View {
-        NavigationStack {
-            List {
-                Section(header: Text("Widget Configuration: To-Do List")) {
-                    Button("Purge Items Manually Now") {
-                        TodoStore.shared.purgeOldCompletedItems()
-                        refreshData()
-                    }
-                }
-                
-                Section(header: Text("Current Active Tasks")) {
-                    ForEach(todos) { todo in
-                        HStack {
-                            Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                            Text(todo.title)
-                                .strikethrough(todo.isCompleted)
-                                .foregroundColor(todo.isCompleted ? .secondary : .primary)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Dashboard")
-            .toolbar {
-                Button(action: { showAddTaskSheet = true }) {
-                    Image(systemName: "plus")
-                }
-            }
-            // Refresh the list whenever the app comes into view
-            .onAppear {
-                refreshData()
-            }
-            .onOpenURL { url in
-                if url.absoluteString == "todo://add" {
-                    showAddTaskSheet = true
-                }
-                // Always pull latest data
-                refreshData()
-            }
-            .sheet(isPresented: $showAddTaskSheet) {
-                NavigationStack {
-                    Form {
-                        TextField("Task Title", text: $newTaskTitle)
-                    }
-                    .navigationTitle("Add New Task")
-                    .toolbar {
-                        Button("Save") {
-                            let newItem = TodoItem(title: newTaskTitle)
-                            var currentTodos = TodoStore.shared.getTodos()
-                            currentTodos.append(newItem)
-                            TodoStore.shared.saveTodos(currentTodos)
-                            
-                            newTaskTitle = ""
-                            showAddTaskSheet = false
-                            refreshData()
-                        }
-                    }
-                }
+    // Enum for each widget type
+    enum WidgetType: String, CaseIterable, Identifiable {
+        case todo = "To-Do List"
+        
+        var id: String { self.rawValue }
+        
+        var icon: String {
+            switch self {
+            case .todo: return "checkmark.circle.fill"
             }
         }
     }
+    
+    @State private var selectedWidget: WidgetType? = .todo
 
-    func refreshData() {
-        todos = TodoStore.shared.getTodos()
-        WidgetCenter.shared.reloadAllTimelines()
+    var body: some View {
+        NavigationSplitView {
+            List(WidgetType.allCases, selection: $selectedWidget) { widget in
+                NavigationLink(value: widget) {
+                    Label(widget.rawValue, systemImage: widget.icon)
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .padding(.vertical, 4)
+                }
+            }
+            .navigationTitle("Widgets")
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 300)
+        } detail: {
+            if let selectedWidget {
+                switch selectedWidget {
+                case .todo:
+                    TodoManagementView()
+                }
+            } else {
+                // Placeholder state for unknown state
+                VStack(spacing: 16) {
+                    Image(systemName: "widget.badge")
+                        .font(.system(size: 48))
+                        .foregroundColor(.secondary)
+                    Text("Select a Widget Type")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                    Text("Choose a category from the sidebar to configure its settings.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        // Route to appropriate sidebar tab
+        .onOpenURL { url in
+            if url.absoluteString == "todo://add" {
+                selectedWidget = .todo
+            }
+        }
     }
 }
