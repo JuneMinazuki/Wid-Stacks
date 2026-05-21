@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "150AF7CB2FB2C3CE00B0DC59"
-               BuildableName = "Wid-Stacks.app"
+               BuildableName = "WidStacks.app"
                BlueprintName = "Wid-Stacks"
                ReferencedContainer = "container:Wid-Stacks.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "150AF7CB2FB2C3CE00B0DC59"
-            BuildableName = "Wid-Stacks.app"
+            BuildableName = "WidStacks.app"
             BlueprintName = "Wid-Stacks"
             ReferencedContainer = "container:Wid-Stacks.xcodeproj">
          </BuildableReference>
@@ -63,7 +63,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "150AF7CB2FB2C3CE00B0DC59"
-            BuildableName = "Wid-Stacks.app"
+            BuildableName = "WidStacks.app"
             BlueprintName = "Wid-Stacks"
             ReferencedContainer = "container:Wid-Stacks.xcodeproj">
          </BuildableReference>
