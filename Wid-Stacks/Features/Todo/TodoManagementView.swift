@@ -5,6 +5,10 @@ struct TodoManagementView: View {
     @State private var todos: [TodoItem] = []
     @State private var showAddTaskSheet = false
     @State private var newTaskTitle = ""
+    
+    // State to track which item is being edited
+    @State private var editingTodoID: UUID? = nil
+    @State private var editingText = ""
 
     private var totalTasks: Int { todos.count }
     private var completedTasks: Int { todos.filter { $0.isCompleted }.count }
@@ -88,21 +92,17 @@ struct TodoManagementView: View {
                     } else {
                         VStack(spacing: 0) {
                             ForEach(todos) { todo in
-                                HStack(spacing: 14) {
-                                    Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(todo.isCompleted ? .green : .secondary)
-                                        .font(.title3)
-                                    
-                                    Text(todo.title)
-                                        .strikethrough(todo.isCompleted)
-                                        .foregroundColor(todo.isCompleted ? .secondary : .primary)
-                                    
-                                    Spacer()
-                                }
-                                .padding()
+                                TodoRowView(
+                                    todo: todo,
+                                    editingTodoID: $editingTodoID,
+                                    editingText: $editingText,
+                                    onToggle: { toggleTodo(todo) },
+                                    onDelete: { deleteTodo(todo) },
+                                    onSaveEdit: { newTitle in saveEdit(for: todo, newTitle: newTitle) }
+                                )
                                 
                                 if todo.id != todos.last?.id {
-                                    Divider().padding(.leading, 50)
+                                    Divider()
                                 }
                             }
                         }
@@ -170,6 +170,32 @@ struct TodoManagementView: View {
         WidgetCenter.shared.reloadAllTimelines()
     }
     
+    private func toggleTodo(_ todo: TodoItem) {
+        var currentTodos = TodoStore.shared.getTodos()
+        if let index = currentTodos.firstIndex(where: { $0.id == todo.id }) {
+            currentTodos[index].isCompleted.toggle()
+            TodoStore.shared.saveTodos(currentTodos)
+            refreshData()
+        }
+    }
+    
+    private func deleteTodo(_ todo: TodoItem) {
+        var currentTodos = TodoStore.shared.getTodos()
+        currentTodos.removeAll(where: { $0.id == todo.id })
+        TodoStore.shared.saveTodos(currentTodos)
+        refreshData()
+    }
+    
+    private func saveEdit(for todo: TodoItem, newTitle: String) {
+        guard !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        var currentTodos = TodoStore.shared.getTodos()
+        if let index = currentTodos.firstIndex(where: { $0.id == todo.id }) {
+            currentTodos[index].title = newTitle
+            TodoStore.shared.saveTodos(currentTodos)
+            refreshData()
+        }
+    }
+    
     // Cards for stats items
     @ViewBuilder
     private func statCard(title: String, count: Int, icon: String, color: Color) -> some View {
@@ -195,5 +221,111 @@ struct TodoManagementView: View {
         .padding()
         .background(containerBackground)
         .cornerRadius(12)
+    }
+}
+
+// MARK: - Subviews
+
+struct TodoRowView: View {
+    let todo: TodoItem
+    @Binding var editingTodoID: UUID?
+    @Binding var editingText: String
+    
+    var onToggle: () -> Void
+    var onDelete: () -> Void
+    var onSaveEdit: (String) -> Void
+    
+    @State private var dragOffset: CGFloat = 0
+    @FocusState private var isTextFieldFocused: Bool
+    
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            // Swipe left to delete
+            if dragOffset < 0 {
+                Color.red
+                    .frame(width: abs(dragOffset))
+                    .overlay(
+                        HStack {
+                            Spacer()
+                            Text("Delete")
+                                .foregroundColor(.white)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                            Image(systemName: "trash")
+                                .foregroundColor(.white)
+                                .font(.subheadline)
+                                .padding(.trailing, 16)
+                        },
+                        alignment: .trailing
+                    )
+            }
+            
+            // Main Content
+            HStack(spacing: 14) {
+                Button(action: onToggle) {
+                    Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(todo.isCompleted ? .green : .secondary)
+                        .font(.title3)
+                }
+                .buttonStyle(.plain)
+                
+                if editingTodoID == todo.id {
+                    TextField("", text: $editingText, onCommit: {
+                        onSaveEdit(editingText)
+                        editingTodoID = nil
+                    })
+                    .textFieldStyle(.squareBorder)
+                    .focused($isTextFieldFocused)
+                    .onAppear {
+                        isTextFieldFocused = true
+                    }
+                } else {
+                    Text(todo.title)
+                        .strikethrough(todo.isCompleted)
+                        .foregroundColor(todo.isCompleted ? .secondary : .primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .onTapGesture(count: 2) {
+                            editingText = todo.title
+                            editingTodoID = todo.id
+                        }
+                }
+                
+                Spacer()
+            }
+            .padding()
+            .background(Color(white: 0.16).opacity(0.6))
+            .contentShape(Rectangle())
+            .offset(x: dragOffset)
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 10)
+                    .onChanged { value in
+                        // Only allow dragging left
+                        if value.translation.width < 0 {
+                            dragOffset = value.translation.width
+                        }
+                    }
+                    .onEnded { value in
+                        // Trigger deletion if swiped far enough left
+                        if value.translation.width < -120 {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                dragOffset = -600
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                onDelete()
+                            }
+                        } else {
+                            withAnimation(.spring()) {
+                                dragOffset = 0
+                            }
+                        }
+                    }
+            )
+            .contextMenu {
+                Button(role: .destructive, action: onDelete) {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+        }
     }
 }
