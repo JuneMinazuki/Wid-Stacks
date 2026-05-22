@@ -133,35 +133,47 @@ struct TodoManagementView: View {
             refreshData()
         }
         .sheet(isPresented: $showAddTaskSheet) {
-            NavigationStack {
-                Form {
-                    Section(header: Text("Task Details")) {
-                        TextField("What needs to be done?", text: $newTaskTitle)
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Add New Task")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                TextField("What needs to be done?", text: $newTaskTitle)
+                                    .textFieldStyle(.plain)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 12)
+                                    .background(containerBackground)
+                                    .cornerRadius(12)
+                
+                HStack(spacing: 12) {
+                    Spacer()
+                    
+                    Button("Cancel") {
+                        showAddTaskSheet = false
+                        newTaskTitle = ""
                     }
-                }
-                .navigationTitle("Add New Task")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
-                            showAddTaskSheet = false
-                            newTaskTitle = ""
-                        }
+                    .buttonStyle(.bordered)
+                    .controlSize(.regular)
+                    
+                    Button("Save") {
+                        let newItem = TodoItem(title: newTaskTitle)
+                        var currentTodos = TodoStore.shared.getTodos()
+                        currentTodos.append(newItem)
+                        TodoStore.shared.saveTodos(currentTodos)
+                        
+                        newTaskTitle = ""
+                        showAddTaskSheet = false
+                        refreshData()
                     }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            let newItem = TodoItem(title: newTaskTitle)
-                            var currentTodos = TodoStore.shared.getTodos()
-                            currentTodos.append(newItem)
-                            TodoStore.shared.saveTodos(currentTodos)
-                            
-                            newTaskTitle = ""
-                            showAddTaskSheet = false
-                            refreshData()
-                        }
-                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.regular)
+                    .disabled(newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .padding(24)
+            .frame(width: 440)
+            .background(Color(white: 0.09))
         }
     }
 
