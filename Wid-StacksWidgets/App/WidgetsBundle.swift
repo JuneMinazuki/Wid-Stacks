@@ -8,7 +8,6 @@ struct AppWidgetBundle: WidgetBundle {
     }
 }
 
-// Simple Timeline Provider for the Todo Widget
 @MainActor
 struct TodoProvider: TimelineProvider {
     func placeholder(in context: Context) -> TodoEntry {
@@ -21,15 +20,25 @@ struct TodoProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (WidgetKit.Timeline<TodoEntry>) -> Void) {
-        // Run midnight cleanup
-        TodoStore.shared.purgeOldCompletedItems()
+        let allTodos = TodoStore.shared.getTodos()
         
-        // Get fresh data
-        let entries = [TodoEntry(date: Date(), todos: TodoStore.shared.getTodos())]
+        // Filter out old items in memory
+        let cal = Calendar.current
+        let midnight = cal.startOfDay(for: Date())
+
+        let activeOrRecentTodos = allTodos.filter { item in
+            if let completedDate = item.completedAt {
+                return completedDate >= midnight // Keep items completed today
+            }
+            return !item.isCompleted // Keep uncompleted items
+        }
         
-        // Refresh exactly at midnight
-        let midnight = Calendar.current.startOfDay(for: Date().addingTimeInterval(86400))
-        let timeline = WidgetKit.Timeline(entries: entries, policy: .after(midnight))
+        // Create the static timeline entry
+        let entry = TodoEntry(date: Date(), todos: activeOrRecentTodos)
+        
+        // Set the reload policy for the next day's midnight
+        let nextMidnight = cal.startOfDay(for: Date().addingTimeInterval(86400)).addingTimeInterval(300)
+        let timeline = WidgetKit.Timeline(entries: [entry], policy: .after(nextMidnight))
         
         completion(timeline)
     }

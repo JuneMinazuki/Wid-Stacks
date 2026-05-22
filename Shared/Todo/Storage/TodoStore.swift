@@ -20,14 +20,15 @@ class TodoStore {
         return decoded
     }
 
-    func saveTodos(_ todos: [TodoItem]) {
+    func saveTodos(_ todos: [TodoItem], reloadWidget: Bool = true) {
         guard let defaults = sharedDefaults,
               let encoded = try? JSONEncoder().encode(todos) else { return }
         
         defaults.set(encoded, forKey: storageKey)
         
-        // Force update widget
-        WidgetCenter.shared.reloadAllTimelines()
+        if reloadWidget {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
     
     func toggleTodo(id: UUID) {
@@ -35,7 +36,7 @@ class TodoStore {
         if let index = currentTodos.firstIndex(where: { $0.id == id }) {
             currentTodos[index].isCompleted.toggle()
             currentTodos[index].completedAt = currentTodos[index].isCompleted ? Date() : nil
-            saveTodos(currentTodos)
+            saveTodos(currentTodos, reloadWidget: false)
         }
     }
     
@@ -47,7 +48,7 @@ class TodoStore {
     }
 
     // For auto remove after midnight
-    func purgeOldCompletedItems() {
+    func purgeOldCompletedItems(reloadWidget: Bool = true) {
         let todos = getTodos()
         let cal = Calendar.current
         let midnight = cal.startOfDay(for: Date())
@@ -58,6 +59,7 @@ class TodoStore {
             }
             return !item.isCompleted // Keep uncompleted items
         }
-        saveTodos(filtered)
+        
+        saveTodos(filtered, reloadWidget: reloadWidget)
     }
 }

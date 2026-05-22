@@ -124,6 +124,7 @@ struct TodoManagementView: View {
             }
         }
         .onAppear {
+            TodoStore.shared.purgeOldCompletedItems(reloadWidget: false)
             refreshData()
         }
         .onOpenURL { url in
