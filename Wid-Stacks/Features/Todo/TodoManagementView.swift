@@ -36,7 +36,7 @@ struct TodoManagementView: View {
                     
                     VStack(spacing: 0) {
                         Button(action: {
-                            TodoStore.shared.purgeOldCompletedItems()
+                            TodoStore.shared.purgeAllCompletedItems()
                             refreshData()
                         }) {
                             HStack {
@@ -183,12 +183,8 @@ struct TodoManagementView: View {
     }
     
     private func toggleTodo(_ todo: TodoItem) {
-        var currentTodos = TodoStore.shared.getTodos()
-        if let index = currentTodos.firstIndex(where: { $0.id == todo.id }) {
-            currentTodos[index].isCompleted.toggle()
-            TodoStore.shared.saveTodos(currentTodos)
-            refreshData()
-        }
+        TodoStore.shared.toggleTodo(id: todo.id)
+        refreshData()
     }
     
     private func deleteTodo(_ todo: TodoItem) {

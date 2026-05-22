@@ -29,7 +29,24 @@ class TodoStore {
         // Force update widget
         WidgetCenter.shared.reloadAllTimelines()
     }
+    
+    func toggleTodo(id: UUID) {
+        var currentTodos = getTodos()
+        if let index = currentTodos.firstIndex(where: { $0.id == id }) {
+            currentTodos[index].isCompleted.toggle()
+            currentTodos[index].completedAt = currentTodos[index].isCompleted ? Date() : nil
+            saveTodos(currentTodos)
+        }
+    }
+    
+    // Instantly remove completed task
+    func purgeAllCompletedItems() {
+        let todos = getTodos()
+        let filtered = todos.filter { !$0.isCompleted }
+        saveTodos(filtered)
+    }
 
+    // For auto remove after midnight
     func purgeOldCompletedItems() {
         let todos = getTodos()
         let cal = Calendar.current
@@ -39,7 +56,7 @@ class TodoStore {
             if let completedDate = item.completedAt {
                 return completedDate >= midnight // Keep if completed after today midnight
             }
-            return true // Keep uncompleted items
+            return !item.isCompleted // Keep uncompleted items
         }
         saveTodos(filtered)
     }
