@@ -133,6 +133,11 @@ struct TodoManagementView: View {
             }
             refreshData()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.willBecomeActiveNotification)) { _ in
+            if TodoStore.shared.refreshCacheIfNeeded() {
+                refreshData()
+            }
+        }
         .sheet(isPresented: $showAddTaskSheet) {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Add New Task")
@@ -161,7 +166,7 @@ struct TodoManagementView: View {
                         let newItem = TodoItem(title: newTaskTitle)
                         var currentTodos = TodoStore.shared.getTodos()
                         currentTodos.append(newItem)
-                        TodoStore.shared.saveTodos(currentTodos)
+                        TodoStore.shared.saveTodos(currentTodos, reloadWidget: true)
                         
                         newTaskTitle = ""
                         showAddTaskSheet = false
@@ -182,7 +187,6 @@ struct TodoManagementView: View {
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
             todos = TodoStore.shared.getTodos()
         }
-        WidgetCenter.shared.reloadAllTimelines()
     }
     
     private func toggleTodo(_ todo: TodoItem) {
@@ -246,98 +250,54 @@ struct TodoRowView: View {
     var onDelete: () -> Void
     var onSaveEdit: (String) -> Void
     
-    @State private var dragOffset: CGFloat = 0
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
-        ZStack(alignment: .trailing) {
-            // Swipe left to delete
-            if dragOffset < 0 {
-                Color.red
-                    .frame(width: abs(dragOffset))
-                    .overlay(
-                        HStack {
-                            Spacer()
-                            Text("Delete")
-                                .foregroundColor(.white)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                            Image(systemName: "trash")
-                                .foregroundColor(.white)
-                                .font(.subheadline)
-                                .padding(.trailing, 16)
-                        },
-                        alignment: .trailing
-                    )
+        HStack(spacing: 14) {
+            Button(action: onToggle) {
+                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(todo.isCompleted ? .green : .secondary)
+                    .font(.title3)
+            }
+            .buttonStyle(.plain)
+            
+            if editingTodoID == todo.id {
+                TextField("", text: $editingText, onCommit: {
+                    onSaveEdit(editingText)
+                    editingTodoID = nil
+                })
+                .textFieldStyle(.squareBorder)
+                .focused($isTextFieldFocused)
+                .onAppear {
+                    isTextFieldFocused = true
+                }
+            } else {
+                Text(todo.title)
+                    .strikethrough(todo.isCompleted)
+                    .foregroundColor(todo.isCompleted ? .secondary : .primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .onTapGesture(count: 2) {
+                        editingText = todo.title
+                        editingTodoID = todo.id
+                    }
             }
             
-            // Main Content
-            HStack(spacing: 14) {
-                Button(action: onToggle) {
-                    Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(todo.isCompleted ? .green : .secondary)
-                        .font(.title3)
-                }
-                .buttonStyle(.plain)
-                
-                if editingTodoID == todo.id {
-                    TextField("", text: $editingText, onCommit: {
-                        onSaveEdit(editingText)
-                        editingTodoID = nil
-                    })
-                    .textFieldStyle(.squareBorder)
-                    .focused($isTextFieldFocused)
-                    .onAppear {
-                        isTextFieldFocused = true
-                    }
-                } else {
-                    Text(todo.title)
-                        .strikethrough(todo.isCompleted)
-                        .foregroundColor(todo.isCompleted ? .secondary : .primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                        .onTapGesture(count: 2) {
-                            editingText = todo.title
-                            editingTodoID = todo.id
-                        }
-                }
-                
-                Spacer()
-            }
-            .padding()
-            .background(Color(white: 0.16).opacity(0.6))
-            .contentShape(Rectangle())
-            .offset(x: dragOffset)
-            .highPriorityGesture(
-                DragGesture(minimumDistance: 10)
-                    .onChanged { value in
-                        // Only allow dragging left
-                        if value.translation.width < 0 {
-                            dragOffset = value.translation.width
-                        }
-                    }
-                    .onEnded { value in
-                        // Trigger deletion if swiped far enough left
-                        if value.translation.width < -120 {
-                            withAnimation(.easeOut(duration: 0.2)) {
-                                dragOffset = -600
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                onDelete()
-                            }
-                        } else {
-                            withAnimation(.spring()) {
-                                dragOffset = 0
-                            }
-                        }
-                    }
-            )
-            .contextMenu {
-                Button(role: .destructive, action: onDelete) {
-                    Label("Delete", systemImage: "trash")
-                }
-            }
-            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: todo.isCompleted)
+            Spacer()
         }
+        .padding()
+        .background(Color(white: 0.16).opacity(0.6))
+        .contentShape(Rectangle())
+        .contextMenu {
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: todo.isCompleted)
     }
 }
