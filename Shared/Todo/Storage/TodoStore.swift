@@ -17,7 +17,18 @@ class TodoStore {
               let decoded = try? JSONDecoder().decode([TodoItem].self, from: data) else {
             return []
         }
-        return decoded
+        
+        // Sorts tasks to show uncompleted (false) first
+        return decoded.sorted { lhs, rhs in
+            if lhs.isCompleted != rhs.isCompleted {
+                return !lhs.isCompleted
+            }
+            // Sort by completion date
+            if lhs.isCompleted, let lhsDate = lhs.completedAt, let rhsDate = rhs.completedAt {
+                return lhsDate > rhsDate
+            }
+            return false
+        }
     }
 
     func saveTodos(_ todos: [TodoItem], reloadWidget: Bool = true) {

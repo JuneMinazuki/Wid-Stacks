@@ -179,7 +179,9 @@ struct TodoManagementView: View {
     }
 
     private func refreshData() {
-        todos = TodoStore.shared.getTodos()
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+            todos = TodoStore.shared.getTodos()
+        }
         WidgetCenter.shared.reloadAllTimelines()
     }
     
@@ -335,6 +337,7 @@ struct TodoRowView: View {
                     Label("Delete", systemImage: "trash")
                 }
             }
+            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: todo.isCompleted)
         }
     }
 }
