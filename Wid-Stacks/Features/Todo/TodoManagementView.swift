@@ -251,7 +251,8 @@ struct TodoRowView: View {
     var onSaveEdit: (String) -> Void
     
     @FocusState private var isTextFieldFocused: Bool
-    
+    @State private var isHovering = false
+
     var body: some View {
         HStack(spacing: 14) {
             Button(action: onToggle) {
@@ -283,17 +284,25 @@ struct TodoRowView: View {
                     }
             }
             
-            Spacer()
+            // Show delete button on hover
+            if isHovering {
+                Button(action: onDelete) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .transition(.opacity)
+            }
         }
         .padding()
         .background(Color(white: 0.16).opacity(0.6))
         .contentShape(Rectangle())
-        .contextMenu {
-            Button(role: .destructive, action: onDelete) {
-                Label("Delete", systemImage: "trash")
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovering = hovering
             }
         }
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+        .contextMenu {
             Button(role: .destructive, action: onDelete) {
                 Label("Delete", systemImage: "trash")
             }
