@@ -36,8 +36,10 @@ struct TodoManagementView: View {
                     
                     VStack(spacing: 0) {
                         Button(action: {
-                            TodoStore.shared.purgeAllCompletedItems()
-                            refreshData()
+                            Task {
+                                await TodoStore.shared.purgeAllCompletedItems()
+                                refreshData()
+                            }
                         }) {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -124,8 +126,10 @@ struct TodoManagementView: View {
             }
         }
         .onAppear {
-            TodoStore.shared.purgeOldCompletedItems(reloadWidget: false)
-            refreshData()
+            Task {
+                await TodoStore.shared.purgeOldCompletedItems(reloadWidget: false)
+                refreshData()
+            }
         }
         .onOpenURL { url in
             if url.absoluteString == "todo://add" {
@@ -134,8 +138,10 @@ struct TodoManagementView: View {
             refreshData()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willBecomeActiveNotification)) { _ in
-            if TodoStore.shared.refreshCacheIfNeeded() {
-                refreshData()
+            Task {
+                if await TodoStore.shared.refreshCacheIfNeeded() {
+                    refreshData()
+                }
             }
         }
         .sheet(isPresented: $showAddTaskSheet) {
@@ -164,13 +170,14 @@ struct TodoManagementView: View {
                     
                     Button("Save") {
                         let newItem = TodoItem(title: newTaskTitle)
-                        var currentTodos = TodoStore.shared.getTodos()
-                        currentTodos.append(newItem)
-                        TodoStore.shared.saveTodos(currentTodos, reloadWidget: true)
-                        
-                        newTaskTitle = ""
-                        showAddTaskSheet = false
-                        refreshData()
+                        Task {
+                            var currentTodos = await TodoStore.shared.getTodos()
+                            currentTodos.append(newItem)
+                            TodoStore.shared.saveTodos(currentTodos, reloadWidget: true)
+                            newTaskTitle = ""
+                            showAddTaskSheet = false
+                            refreshData()
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.regular)
@@ -184,30 +191,40 @@ struct TodoManagementView: View {
     }
 
     private func refreshData() {
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
-            todos = TodoStore.shared.getTodos()
+        Task {
+            let fetchedTodos = await TodoStore.shared.getTodos()
+            
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                self.todos = fetchedTodos
+            }
         }
     }
     
     private func toggleTodo(_ todo: TodoItem) {
-        TodoStore.shared.toggleTodo(id: todo.id)
-        refreshData()
+        Task {
+            await TodoStore.shared.toggleTodo(id: todo.id)
+            refreshData()
+        }
     }
-    
+
     private func deleteTodo(_ todo: TodoItem) {
-        var currentTodos = TodoStore.shared.getTodos()
-        currentTodos.removeAll(where: { $0.id == todo.id })
-        TodoStore.shared.saveTodos(currentTodos)
-        refreshData()
-    }
-    
-    private func saveEdit(for todo: TodoItem, newTitle: String) {
-        guard !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        var currentTodos = TodoStore.shared.getTodos()
-        if let index = currentTodos.firstIndex(where: { $0.id == todo.id }) {
-            currentTodos[index].title = newTitle
+        Task {
+            var currentTodos = await TodoStore.shared.getTodos()
+            currentTodos.removeAll(where: { $0.id == todo.id })
             TodoStore.shared.saveTodos(currentTodos)
             refreshData()
+        }
+    }
+
+    private func saveEdit(for todo: TodoItem, newTitle: String) {
+        guard !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        Task {
+            var currentTodos = await TodoStore.shared.getTodos()
+            if let index = currentTodos.firstIndex(where: { $0.id == todo.id }) {
+                currentTodos[index].title = newTitle
+                TodoStore.shared.saveTodos(currentTodos)
+                refreshData()
+            }
         }
     }
     

@@ -15,32 +15,37 @@ struct TodoProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TodoEntry) -> Void) {
-        let entry = TodoEntry(date: Date(), todos: TodoStore.shared.getTodos())
-        completion(entry)
+        Task {
+            let currentTodos = await TodoStore.shared.getTodos()
+            let entry = TodoEntry(date: Date(), todos: currentTodos)
+            completion(entry)
+        }
     }
 
     func getTimeline(in context: Context, completion: @escaping (WidgetKit.Timeline<TodoEntry>) -> Void) {
-        let allTodos = TodoStore.shared.getTodos()
-        
-        // Filter out old items in memory
-        let cal = Calendar.current
-        let midnight = cal.startOfDay(for: Date())
+        Task {
+            let allTodos = await TodoStore.shared.getTodos()
+            
+            // Filter out old items in memory
+            let cal = Calendar.current
+            let midnight = cal.startOfDay(for: Date())
 
-        let activeOrRecentTodos = allTodos.filter { item in
-            if let completedDate = item.completedAt {
-                return completedDate >= midnight // Keep items completed today
+            let activeOrRecentTodos = allTodos.filter { item in
+                if let completedDate = item.completedAt {
+                    return completedDate >= midnight // Keep items completed today
+                }
+                return !item.isCompleted // Keep uncompleted items
             }
-            return !item.isCompleted // Keep uncompleted items
+            
+            // Create the static timeline entry
+            let entry = TodoEntry(date: Date(), todos: activeOrRecentTodos)
+            
+            // Set the reload policy for the next day's midnight
+            let nextMidnight = cal.startOfDay(for: Date().addingTimeInterval(86400)).addingTimeInterval(300)
+            let timeline = WidgetKit.Timeline(entries: [entry], policy: .after(nextMidnight))
+            
+            completion(timeline)
         }
-        
-        // Create the static timeline entry
-        let entry = TodoEntry(date: Date(), todos: activeOrRecentTodos)
-        
-        // Set the reload policy for the next day's midnight
-        let nextMidnight = cal.startOfDay(for: Date().addingTimeInterval(86400)).addingTimeInterval(300)
-        let timeline = WidgetKit.Timeline(entries: [entry], policy: .after(nextMidnight))
-        
-        completion(timeline)
     }
 }
 

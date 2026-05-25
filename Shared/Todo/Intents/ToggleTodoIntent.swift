@@ -16,7 +16,7 @@ struct ToggleTodoIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         if let uuid = UUID(uuidString: id) {
-            TodoStore.shared.toggleTodo(id: uuid)
+            await TodoStore.shared.toggleTodo(id: uuid)
         }
         return .result()
     }
