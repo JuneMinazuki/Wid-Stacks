@@ -4,39 +4,59 @@ import WidgetKit
 @MainActor
 class TodoStore {
     static let shared = TodoStore()
-    private let sharedSuiteName = "group.com.juneminazuki.Wid-Stacks"
-    private let storageKey = "saved_todos"
-    private let syncKey = "todos_sync_token"
+    private let folderName = "WidStacks"
+    private let fileName = "todos.json"
     
-    private var sharedDefaults: UserDefaults? {
-        return UserDefaults(suiteName: sharedSuiteName)
+    private var cachedTodos: [TodoItem]?
+    private var lastModificationDate: Date?
+
+    private var fileURL: URL {
+        let widgetBundleIdentifier = "com.juneminazuki.Wid-Stacks.Widgets" 
+        
+        let appSupportURL: URL
+        let currentBundleID = Bundle.main.bundleIdentifier ?? ""
+        
+        if currentBundleID.hasSuffix(".Widgets") { 
+            // Running inside the sandboxed widget
+            appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        } else {
+            // Running inside the unsandboxed main app
+            let homeURL = FileManager.default.homeDirectoryForCurrentUser
+            appSupportURL = homeURL.appendingPathComponent("Library/Containers/\(widgetBundleIdentifier)/Data/Library/Application Support")
+        }
+        
+        let customFolder = appSupportURL.appendingPathComponent(folderName)
+        
+        if !FileManager.default.fileExists(atPath: customFolder.path) {
+            try? FileManager.default.createDirectory(at: customFolder, withIntermediateDirectories: true, attributes: nil)
+        }
+        
+        return customFolder.appendingPathComponent(fileName)
     }
 
-    private var cachedTodos: [TodoItem]?
-    private var localSyncToken: Double = 0
-
     func getTodos() -> [TodoItem] {
-        guard let defaults = sharedDefaults else { return [] }
-        let externalToken = defaults.double(forKey: syncKey)
+        let url = fileURL
         
-        if localSyncToken == externalToken, let cached = cachedTodos {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        let currentModDate = attributes?[.modificationDate] as? Date
+        
+        if let cached = cachedTodos, let lastMod = lastModificationDate, lastMod == currentModDate {
             return cached
         }
 
         // Read from disk if file had changed
-        guard let data = defaults.data(forKey: storageKey),
+        guard FileManager.default.fileExists(atPath: url.path),
+              let data = try? Data(contentsOf: url),
               let decoded = try? JSONDecoder().decode([TodoItem].self, from: data) else {
             return []
         }
         
         cachedTodos = decoded
-        localSyncToken = externalToken
+        lastModificationDate = currentModDate
         return decoded
     }
 
     func saveTodos(_ todos: [TodoItem], reloadWidget: Bool = true) {
-        let newToken = Date().timeIntervalSince1970
-        
         // Sorts tasks to show uncompleted (false) first
         let sortedTodos = todos.sorted { lhs, rhs in
             if lhs.isCompleted != rhs.isCompleted {
@@ -49,14 +69,15 @@ class TodoStore {
             return false
         }
         
-        guard let defaults = sharedDefaults,
-              let encoded = try? JSONEncoder().encode(sortedTodos) else { return }
+        let url = fileURL
+        guard let data = try? JSONEncoder().encode(sortedTodos) else { return }
         
-        defaults.set(encoded, forKey: storageKey)
-        defaults.set(newToken, forKey: syncKey)
+        try? data.write(to: url, options: .atomic)
         
         cachedTodos = sortedTodos
-        localSyncToken = newToken
+        
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        lastModificationDate = attributes?[.modificationDate] as? Date
         
         if reloadWidget {
             WidgetCenter.shared.reloadAllTimelines()
@@ -98,10 +119,11 @@ class TodoStore {
     }
     
     func refreshCacheIfNeeded() -> Bool {
-        guard let defaults = sharedDefaults else { return false }
-        let externalToken = defaults.double(forKey: syncKey)
+        let url = fileURL
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        let currentModDate = attributes?[.modificationDate] as? Date
         
-        if localSyncToken != externalToken {
+        if lastModificationDate != currentModDate {
             invalidateCache()
             return true // Data actually changed externally
         }
@@ -110,5 +132,6 @@ class TodoStore {
     
     func invalidateCache() {
         cachedTodos = nil
+        lastModificationDate = nil
     }
 }
