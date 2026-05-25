@@ -88,6 +88,8 @@ struct TodoWidgetView: View {
                 .padding(.top, 1)
             
             taskContentList
+            
+            Spacer(minLength: 0)
         }
     }
     
