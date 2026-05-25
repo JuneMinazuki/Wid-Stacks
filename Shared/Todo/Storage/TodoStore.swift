@@ -5,7 +5,7 @@ import WidgetKit
 class TodoStore {
     static let shared = TodoStore()
     private let folderName = "WidStacks"
-    private let fileName = "todos.json"
+    private let fileName = "todos.plist"
     
     private var cachedTodos: [TodoItem]?
     private var lastModificationDate: Date?
@@ -35,25 +35,34 @@ class TodoStore {
     }
 
     func getTodos() -> [TodoItem] {
-        let url = fileURL
-        
-        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
-        let currentModDate = attributes?[.modificationDate] as? Date
-        
-        if let cached = cachedTodos, let lastMod = lastModificationDate, lastMod == currentModDate {
+        if let cached = cachedTodos {
             return cached
         }
+        return loadFromDisk()
+    }
 
-        // Read from disk if file had changed
-        guard FileManager.default.fileExists(atPath: url.path),
-              let data = try? Data(contentsOf: url),
-              let decoded = try? JSONDecoder().decode([TodoItem].self, from: data) else {
-            return []
+    private func loadFromDisk() -> [TodoItem] {
+        let url = fileURL
+        var loadedTodos: [TodoItem] = []
+        
+        let coordinator = NSFileCoordinator()
+        var error: NSError?
+        
+        coordinator.coordinate(readingItemAt: url, options: [], error: &error) { readURL in
+            guard FileManager.default.fileExists(atPath: readURL.path),
+                  let data = try? Data(contentsOf: readURL) else { return }
+                  
+            let attributes = try? FileManager.default.attributesOfItem(atPath: readURL.path)
+            self.lastModificationDate = attributes?[.modificationDate] as? Date
+            
+            if let decoded = try? PropertyListDecoder().decode([TodoItem].self, from: data) {
+                loadedTodos = decoded
+            }
         }
         
-        cachedTodos = decoded
-        lastModificationDate = currentModDate
-        return decoded
+        if loadedTodos.isEmpty && error != nil { return [] }
+        cachedTodos = loadedTodos
+        return loadedTodos
     }
 
     func saveTodos(_ todos: [TodoItem], reloadWidget: Bool = true) {
@@ -70,15 +79,21 @@ class TodoStore {
         }
         
         let url = fileURL
-        guard let data = try? JSONEncoder().encode(sortedTodos) else { return }
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .binary
+        guard let data = try? encoder.encode(sortedTodos) else { return }
         
-        try? data.write(to: url, options: .atomic)
+        let coordinator = NSFileCoordinator()
+        var error: NSError?
+        
+        coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { writeURL in
+            try? data.write(to: writeURL, options: .atomic)
+            
+            let attributes = try? FileManager.default.attributesOfItem(atPath: writeURL.path)
+            self.lastModificationDate = attributes?[.modificationDate] as? Date
+        }
         
         cachedTodos = sortedTodos
-        
-        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
-        lastModificationDate = attributes?[.modificationDate] as? Date
-        
         if reloadWidget {
             WidgetCenter.shared.reloadAllTimelines()
         }
@@ -115,16 +130,20 @@ class TodoStore {
             return !item.isCompleted // Keep uncompleted items
         }
         
-        saveTodos(filtered, reloadWidget: reloadWidget)
+        if filtered.count != todos.count {
+            saveTodos(filtered, reloadWidget: reloadWidget)
+        }
     }
     
     func refreshCacheIfNeeded() -> Bool {
         let url = fileURL
+        guard FileManager.default.fileExists(atPath: url.path) else { return false }
+        
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         let currentModDate = attributes?[.modificationDate] as? Date
         
         if lastModificationDate != currentModDate {
-            invalidateCache()
+            _ = loadFromDisk()
             return true // Data actually changed externally
         }
         return false // Data is identical, do nothing
