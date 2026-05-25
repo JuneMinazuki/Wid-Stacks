@@ -144,6 +144,9 @@ struct TodoManagementView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("RefreshTodoData"))) { _ in
+            refreshData()
+        }
         .sheet(isPresented: $showAddTaskSheet) {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Add New Task")

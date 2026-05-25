@@ -1,5 +1,6 @@
 import AppIntents
 import WidgetKit
+import Foundation
 
 struct ToggleTodoIntent: AppIntent {
     static var title: LocalizedStringResource = "Toggle Todo Item"
@@ -15,9 +16,10 @@ struct ToggleTodoIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        if let uuid = UUID(uuidString: id) {
-            await TodoStore.shared.toggleTodo(id: uuid)
-        }
+        guard let uuid = UUID(uuidString: id) else { return .result() }
+        
+        await TodoStore.shared.toggleTodo(id: uuid)
+        
         return .result()
     }
 }

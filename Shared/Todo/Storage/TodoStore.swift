@@ -10,6 +10,21 @@ class TodoStore {
     private var cachedTodos: [TodoItem]?
     private var lastModificationDate: Date?
 
+    private init() {
+        // Listen for cross-process data changes from the app or widget extension
+        DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name("com.juneminazuki.WidStacks.DataChanged"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task {
+                if await self?.refreshCacheIfNeeded() == true {
+                    NotificationCenter.default.post(name: NSNotification.Name("RefreshTodoData"), object: nil)
+                }
+            }
+        }
+    }
+
     private var fileURL: URL {
         let widgetBundleIdentifier = "com.juneminazuki.Wid-Stacks.Widgets"
         
@@ -35,6 +50,7 @@ class TodoStore {
     }
 
     func getTodos() async -> [TodoItem] {
+        _ = await refreshCacheIfNeeded()
         if let cached = cachedTodos {
             return cached
         }
@@ -107,6 +123,14 @@ class TodoStore {
             
             self.lastModificationDate = newModDate
             
+            // Notify app and widget to refresh
+            DistributedNotificationCenter.default().postNotificationName(
+                NSNotification.Name("com.juneminazuki.WidStacks.DataChanged"),
+                object: nil,
+                userInfo: nil,
+                deliverImmediately: true
+            )
+            
             if reloadWidget {
                 WidgetCenter.shared.reloadAllTimelines()
             }
@@ -157,8 +181,9 @@ class TodoStore {
         let currentModDate = attributes?[.modificationDate] as? Date
         
         if lastModificationDate != currentModDate {
-            let freshTodos = await loadFromDisk()
-            self.cachedTodos = freshTodos
+            self.cachedTodos = nil
+            self.lastModificationDate = currentModDate
+            _ = await loadFromDisk()
             return true // Data actually changed externally
         }
         return false // Data is identical, do nothing
