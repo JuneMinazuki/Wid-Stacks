@@ -26,27 +26,24 @@ class TodoStore {
     }
 
     private var fileURL: URL {
-        let widgetBundleIdentifier = "com.juneminazuki.Wid-Stacks.Widgets"
-        
-        let appSupportURL: URL
-        let currentBundleID = Bundle.main.bundleIdentifier ?? ""
-        
-        if currentBundleID.hasSuffix(".Widgets") {
-            // Running inside the sandboxed widget
-            appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        } else {
-            // Running inside the unsandboxed main app
-            let homeURL = FileManager.default.homeDirectoryForCurrentUser
-            appSupportURL = homeURL.appendingPathComponent("Library/Containers/\(widgetBundleIdentifier)/Data/Library/Application Support")
-        }
-        
-        let customFolder = appSupportURL.appendingPathComponent(folderName)
-        
-        if !FileManager.default.fileExists(atPath: customFolder.path) {
+        guard let pw = getpwuid(getuid()), let homeDirCStr = pw.pointee.pw_dir else {
+            let fallback = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let customFolder = fallback.appendingPathComponent(folderName)
             try? FileManager.default.createDirectory(at: customFolder, withIntermediateDirectories: true, attributes: nil)
+            return customFolder.appendingPathComponent(fileName)
         }
         
-        return customFolder.appendingPathComponent(fileName)
+        let homeURL = URL(fileURLWithPath: String(cString: homeDirCStr))
+        let targetFolder = homeURL
+            .appendingPathComponent("Library")
+            .appendingPathComponent("Application Support")
+            .appendingPathComponent(folderName)
+        
+        if !FileManager.default.fileExists(atPath: targetFolder.path) {
+            try? FileManager.default.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
+        }
+        
+        return targetFolder.appendingPathComponent(fileName)
     }
 
     func getTodos() async -> [TodoItem] {
