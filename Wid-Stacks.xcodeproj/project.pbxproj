@@ -146,35 +146,11 @@
 		151B527B2FBD67560090143B /* Todo */ = {
 			isa = PBXGroup;
 			children = (
-				151B527E2FBD67B30090143B /* Storage */,
-				151B527D2FBD67AB0090143B /* Models */,
-				151B527C2FBD679D0090143B /* Intents */,
-			);
-			path = Todo;
-			sourceTree = "<group>";
-		};
-		151B527C2FBD679D0090143B /* Intents */ = {
-			isa = PBXGroup;
-			children = (
-				151B52852FBD68290090143B /* ToggleTodoIntent.swift */,
-			);
-			path = Intents;
-			sourceTree = "<group>";
-		};
-		151B527D2FBD67AB0090143B /* Models */ = {
-			isa = PBXGroup;
-			children = (
 				151B52822FBD67FA0090143B /* TodoItem.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		151B527E2FBD67B30090143B /* Storage */ = {
-			isa = PBXGroup;
-			children = (
+				151B52852FBD68290090143B /* ToggleTodoIntent.swift */,
 				151B527F2FBD67DB0090143B /* TodoStore.swift */,
 			);
-			path = Storage;
+			path = Todo;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
