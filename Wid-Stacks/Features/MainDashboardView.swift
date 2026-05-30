@@ -4,12 +4,14 @@ struct MainDashboardView: View {
     // Enum for each widget type
     enum WidgetType: String, CaseIterable, Identifiable {
         case todo = "To-Do List"
+        case countdown = "Countdown"
         
         var id: String { self.rawValue }
         
         var icon: String {
             switch self {
             case .todo: return "checkmark.circle.fill"
+            case .countdown: return "hourglass"
             }
         }
     }
@@ -33,6 +35,8 @@ struct MainDashboardView: View {
                 switch selectedWidget {
                 case .todo:
                     TodoManagementView()
+                case .countdown:
+                    CountdownManagementView()
                 }
             } else {
                 // Placeholder state for unknown state
@@ -55,6 +59,8 @@ struct MainDashboardView: View {
             
             if url.host == "add" || url.absoluteString == "todo://add" {
                 selectedWidget = .todo
+            } else if url.host == "countdown" || url.absoluteString.contains("countdown") {
+                selectedWidget = .countdown
             } else if url.host == "toggle" {
                 selectedWidget = .todo
                 if let queryItem = components.queryItems?.first(where: { $0.name == "id" }),
