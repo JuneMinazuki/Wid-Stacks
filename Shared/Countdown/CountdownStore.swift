@@ -8,38 +8,61 @@ class CountdownStore {
     private let fileName = "countdown.plist"
     
     private var cachedCountdown: CountdownItem?
-    private var isCacheInitialized = false
     private var lastModificationDate: Date?
 
-    static let localDataChangedNotification = Notification.Name("com.juneminazuki.WidStacks.LocalCountdownChanged")
+    private let distributedNotificationName = "com.juneminazuki.WidStacks.CountdownDataChanged"
+    nonisolated static let localDataChangedNotification = Notification.Name("com.juneminazuki.WidStacks.LocalCountdownChanged")
+    
+    private init() {
+        // Listen for cross-process data changes from the app or widget extension
+        DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name(distributedNotificationName),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task {
+                if await self?.refreshCacheIfNeeded() == true {
+                    NotificationCenter.default.post(name: CountdownStore.localDataChangedNotification, object: nil)
+                }
+            }
+        }
+    }
 
     private var fileURL: URL {
-        guard let pw = getpwuid(getuid()), let homeDirCStr = pw.pointee.pw_dir else {
-            let fallback = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            let customFolder = fallback.appendingPathComponent(folderName)
-            try? FileManager.default.createDirectory(at: customFolder, withIntermediateDirectories: true, attributes: nil)
-            return customFolder.appendingPathComponent(fileName)
+        if let pw = getpwuid(getuid()), let homeDirCStr = pw.pointee.pw_dir {
+            let homeURL = URL(fileURLWithPath: String(cString: homeDirCStr))
+            let targetFolder = homeURL
+                .appendingPathComponent("Library")
+                .appendingPathComponent("Application Support")
+                .appendingPathComponent(folderName)
+            
+            if !FileManager.default.fileExists(atPath: targetFolder.path) {
+                try? FileManager.default.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
+            }
+            return targetFolder.appendingPathComponent(fileName)
         }
         
-        let homeURL = URL(fileURLWithPath: String(cString: homeDirCStr))
-        let targetFolder = homeURL
-            .appendingPathComponent("Library")
-            .appendingPathComponent("Application Support")
-            .appendingPathComponent(folderName)
-        
-        if !FileManager.default.fileExists(atPath: targetFolder.path) {
-            try? FileManager.default.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
+        let fileManager = FileManager.default
+        let fallback = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let targetFolder = fallback.appendingPathComponent(folderName)
+        if !fileManager.fileExists(atPath: targetFolder.path) {
+            try? fileManager.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
         }
-        
         return targetFolder.appendingPathComponent(fileName)
     }
 
     func getCountdown() async -> CountdownItem? {
-        _ = await refreshCacheIfNeeded()
-        if isCacheInitialized {
-            return cachedCountdown
+        if cachedCountdown == nil {
+            if let diskItem = await loadFromDisk() {
+                return diskItem
+            } else {
+                let defaultItem = CountdownItem(title: "New Milestone", date: Date().addingTimeInterval(86400 * 7), isCountUp: false, blurAmount: 10, selectedGradientIndex: 0)
+                self.saveCountdown(defaultItem, reloadWidget: false)
+                return defaultItem
+            }
         }
-        return await loadFromDisk()
+        _ = await refreshCacheIfNeeded()
+        return cachedCountdown
     }
 
     private func loadFromDisk() async -> CountdownItem? {
@@ -68,12 +91,10 @@ class CountdownStore {
         if let data = result.0,
            let decoded = try? PropertyListDecoder().decode(CountdownItem.self, from: data) {
             self.cachedCountdown = decoded
-            self.isCacheInitialized = true
             return decoded
         }
         
         self.cachedCountdown = nil
-        self.isCacheInitialized = true
         return nil
     }
 
@@ -104,6 +125,13 @@ class CountdownStore {
             
             NotificationCenter.default.post(name: CountdownStore.localDataChangedNotification, object: nil)
             
+            DistributedNotificationCenter.default().postNotificationName(
+                NSNotification.Name(distributedNotificationName),
+                object: nil,
+                userInfo: nil,
+                deliverImmediately: true
+            )
+            
             if reloadWidget {
                 WidgetCenter.shared.reloadAllTimelines()
             }
@@ -117,11 +145,10 @@ class CountdownStore {
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         let currentModDate = attributes?[.modificationDate] as? Date
         
-        if lastModificationDate != currentModDate {
-            self.cachedCountdown = nil
+        if lastModificationDate != currentModDate || cachedCountdown == nil {
             self.lastModificationDate = currentModDate
-            _ = await loadFromDisk()
-            return true
+            let updatedItem = await loadFromDisk()
+            return updatedItem != nil
         }
         return false
     }

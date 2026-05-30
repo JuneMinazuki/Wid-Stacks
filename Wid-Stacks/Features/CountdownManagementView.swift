@@ -49,25 +49,16 @@ struct CountdownManagementView: View {
                                     .font(.caption).foregroundColor(.secondary)
                                 TextField("e.g., Project Launch", text: $item.title)
                                     .textFieldStyle(.roundedBorder)
-                                    .onChange(of: item.title) {
-                                        save()
-                                    }
                             }
                             
                             DatePicker("Target Date", selection: $item.date, displayedComponents: [.date, .hourAndMinute])
                                 .datePickerStyle(.compact)
-                                .onChange(of: item.date) {
-                                    save()
-                                }
                             
                             Picker("Counter Mode", selection: $item.isCountUp) {
                                 Text("Count Down (Remaining)").tag(false)
                                 Text("Count Up (Elapsed)").tag(true)
                             }
                             .pickerStyle(.segmented)
-                            .onChange(of: item.isCountUp) {
-                                save()
-                            }
                             
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
@@ -77,9 +68,6 @@ struct CountdownManagementView: View {
                                         .font(.caption).foregroundColor(.secondary)
                                 }
                                 Slider(value: $item.blurAmount, in: 0...100, step: 5)
-                                    .onChange(of: item.blurAmount) {
-                                        save()
-                                    }
                             }
                             
                             VStack(alignment: .leading, spacing: 8) {
@@ -96,7 +84,7 @@ struct CountdownManagementView: View {
                                            )
                                            .onTapGesture {
                                                item.selectedGradientIndex = index
-                                               save()
+                                               save() // Keeps the instant theme update snappy
                                            }
                                    }
                                 }
@@ -124,7 +112,7 @@ struct CountdownManagementView: View {
                                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                                         .padding(16)
                                     
-                                    Text(item.isCountUp ? "Days since\n\(item.title)" : "Days until\n\(item.title)")
+                                    Text(item.isCountUp ? "Days since\n\(item.title.isEmpty ? "Event" : item.title)" : "Days until\n\(item.title.isEmpty ? "Event" : item.title)")
                                         .font(.system(size: 12, weight: .semibold))
                                         .foregroundColor(.white.opacity(0.9))
                                         .padding(16)
@@ -150,7 +138,7 @@ struct CountdownManagementView: View {
                                     .frame(width: 110)
                                     
                                     VStack(alignment: .leading, spacing: 6) {
-                                        Text(item.title.uppercased())
+                                        Text((item.title.isEmpty ? "Event" : item.title).uppercased())
                                             .font(.caption)
                                             .fontWeight(.bold)
                                             .foregroundColor(.secondary)
@@ -183,6 +171,10 @@ struct CountdownManagementView: View {
                 .padding(30)
             }
         }
+        .onChange(of: item.title) { save() }
+        .onChange(of: item.date) { save() }
+        .onChange(of: item.isCountUp) { save() }
+        .onChange(of: item.blurAmount) { save() }
         .task {
             if let fetchedItem = await CountdownStore.shared.getCountdown() {
                 item = fetchedItem

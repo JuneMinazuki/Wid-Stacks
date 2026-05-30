@@ -1,7 +1,7 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
 
-@MainActor
 struct CountdownProvider: TimelineProvider {
     func placeholder(in context: Context) -> CountdownEntry {
         CountdownEntry(
@@ -23,8 +23,7 @@ struct CountdownProvider: TimelineProvider {
             let item = await CountdownStore.shared.getCountdown()
             let entry = CountdownEntry(date: Date(), item: item)
             
-            // Reload every hour to keep day calculations accurate
-            let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date().addingTimeInterval(3600)
+            let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date().addingTimeInterval(1800)
             let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
             
             completion(timeline)
@@ -76,8 +75,12 @@ struct CountdownWidgetView: View {
     @ViewBuilder
     private func smallWidgetLayout(item: CountdownItem) -> some View {
         ZStack(alignment: .bottomLeading) {
-            sampleGradients[item.selectedGradientIndex]
-                .blur(radius: CGFloat(item.blurAmount / 5))
+            // Safe color extraction falling back gracefully to index 0
+            let gradientIndex = item.selectedGradientIndex
+            let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
+            
+            activeGradient
+                .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
             
             Text("\(abs(daysRemaining))")
                 .font(.system(size: 42, weight: .bold, design: .rounded))
@@ -85,7 +88,7 @@ struct CountdownWidgetView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .padding(16)
             
-            Text(item.isCountUp ? "Days since\n\(item.title)" : "Days until\n\(item.title)")
+            Text(item.isCountUp ? "Days since\n\(item.title.isEmpty ? "Event" : item.title)" : "Days until\n\(item.title.isEmpty ? "Event" : item.title)")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.white.opacity(0.9))
                 .padding(16)
@@ -96,28 +99,33 @@ struct CountdownWidgetView: View {
     private func mediumWidgetLayout(item: CountdownItem) -> some View {
         HStack(spacing: 0) {
             ZStack {
-                sampleGradients[item.selectedGradientIndex]
-                    .blur(radius: CGFloat(item.blurAmount / 5))
+                let gradientIndex = item.selectedGradientIndex
+                let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
+                
+                activeGradient
+                    .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
+                
                 Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
                     .font(.title)
                     .foregroundColor(.white)
             }
-            .frame(width: 110)
+            .frame(width: 100)
             
-            VStack(alignment: .leading, spacing: 6) {
-                Text(item.title.uppercased())
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.title.isEmpty ? "MILESTONE" : item.title.uppercased())
                     .font(.caption)
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
                 
                 Text("\(abs(daysRemaining)) Days")
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
                 
-                Text(item.isCountUp ? "Time has accumulated" : "Time remaining to milestone")
+                Text(item.isCountUp ? "Time accumulated since date" : "Time remaining to milestone")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
-            .padding(16)
+            .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
     }
@@ -125,12 +133,12 @@ struct CountdownWidgetView: View {
     @ViewBuilder
     private var emptyStateLayout: some View {
         VStack(spacing: 8) {
-            Image(systemName: "calendar.badge.plus")
+            Image(systemName: "hourglass.badge.plus")
                 .font(.title)
                 .foregroundStyle(.secondary)
-            Text("No Event Configured")
+            Text("No Active Countdown")
                 .font(.headline)
-            Text("Open WidStacks to set your milestone.")
+            Text("Open app sidebar to set an event.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
