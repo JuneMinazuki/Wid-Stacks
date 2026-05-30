@@ -17,6 +17,10 @@
 		151B52862FBD68290090143B /* ToggleTodoIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151B52852FBD68290090143B /* ToggleTodoIntent.swift */; };
 		151B52872FBD68290090143B /* ToggleTodoIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151B52852FBD68290090143B /* ToggleTodoIntent.swift */; };
 		151B528B2FBD6BFE0090143B /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 151B528A2FBD6BFE0090143B /* AppIntents.framework */; };
+		15C011022FC92E06008AB7A2 /* CountdownStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C011012FC92E05008AB7A2 /* CountdownStore.swift */; };
+		15C011032FC92E06008AB7A2 /* CountdownStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C011012FC92E05008AB7A2 /* CountdownStore.swift */; };
+		15C011052FC92E7E008AB7A2 /* CountdownItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C011042FC92E7A008AB7A2 /* CountdownItem.swift */; };
+		15C011062FC92E7E008AB7A2 /* CountdownItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C011042FC92E7A008AB7A2 /* CountdownItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +58,8 @@
 		151B528A2FBD6BFE0090143B /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 		15518CA22FC59FE80076825E /* Wid-Stacks.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Wid-Stacks.entitlements"; sourceTree = "<group>"; };
 		15541AF12FBCBEBC000BB94B /* WidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetsExtension.entitlements; sourceTree = "<group>"; };
+		15C011012FC92E05008AB7A2 /* CountdownStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownStore.swift; sourceTree = "<group>"; };
+		15C011042FC92E7A008AB7A2 /* CountdownItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -138,6 +144,7 @@
 		151B51D42FBD62C60090143B /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				15C011002FC92DFE008AB7A2 /* Countdown */,
 				151B527B2FBD67560090143B /* Todo */,
 			);
 			path = Shared;
@@ -151,6 +158,15 @@
 				151B527F2FBD67DB0090143B /* TodoStore.swift */,
 			);
 			path = Todo;
+			sourceTree = "<group>";
+		};
+		15C011002FC92DFE008AB7A2 /* Countdown */ = {
+			isa = PBXGroup;
+			children = (
+				15C011042FC92E7A008AB7A2 /* CountdownItem.swift */,
+				15C011012FC92E05008AB7A2 /* CountdownStore.swift */,
+			);
+			path = Countdown;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -264,6 +280,8 @@
 			files = (
 				151B52842FBD67FA0090143B /* TodoItem.swift in Sources */,
 				151B52802FBD67DB0090143B /* TodoStore.swift in Sources */,
+				15C011032FC92E06008AB7A2 /* CountdownStore.swift in Sources */,
+				15C011052FC92E7E008AB7A2 /* CountdownItem.swift in Sources */,
 				151B52862FBD68290090143B /* ToggleTodoIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -275,6 +293,8 @@
 				151B52832FBD67FA0090143B /* TodoItem.swift in Sources */,
 				151B52812FBD67DB0090143B /* TodoStore.swift in Sources */,
 				151B52872FBD68290090143B /* ToggleTodoIntent.swift in Sources */,
+				15C011022FC92E06008AB7A2 /* CountdownStore.swift in Sources */,
+				15C011062FC92E7E008AB7A2 /* CountdownItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
