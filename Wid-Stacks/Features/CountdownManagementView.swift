@@ -189,7 +189,7 @@ struct CountdownManagementView: View {
             }
             isLoading = false
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshCountdownData"))) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: CountdownStore.localDataChangedNotification)) { _ in
             Task {
                 if let fetchedItem = await CountdownStore.shared.getCountdown() {
                     self.item = fetchedItem

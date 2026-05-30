@@ -11,20 +11,7 @@ class CountdownStore {
     private var isCacheInitialized = false
     private var lastModificationDate: Date?
 
-    private init() {
-        // Listen for data changes from app or widget
-        DistributedNotificationCenter.default().addObserver(
-            forName: NSNotification.Name("com.juneminazuki.WidStacks.CountdownChanged"),
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task {
-                if await self?.refreshCacheIfNeeded() == true {
-                    NotificationCenter.default.post(name: NSNotification.Name("RefreshCountdownData"), object: nil)
-                }
-            }
-        }
-    }
+    static let localDataChangedNotification = Notification.Name("com.juneminazuki.WidStacks.LocalCountdownChanged")
 
     private var fileURL: URL {
         guard let pw = getpwuid(getuid()), let homeDirCStr = pw.pointee.pw_dir else {
@@ -115,13 +102,7 @@ class CountdownStore {
             
             self.lastModificationDate = newModDate
             
-            // Notify other running targets (e.g., widget/app)
-            DistributedNotificationCenter.default().postNotificationName(
-                NSNotification.Name("com.juneminazuki.WidStacks.CountdownChanged"),
-                object: nil,
-                userInfo: nil,
-                deliverImmediately: true
-            )
+            NotificationCenter.default.post(name: CountdownStore.localDataChangedNotification, object: nil)
             
             if reloadWidget {
                 WidgetCenter.shared.reloadAllTimelines()
