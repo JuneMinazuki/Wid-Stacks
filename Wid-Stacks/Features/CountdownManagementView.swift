@@ -20,6 +20,10 @@ struct CountdownManagementView: View {
         return components.day ?? 0
     }
     
+    var autoIsCountUp: Bool {
+        daysRemaining < 0
+    }
+    
     private let containerBackground = Color(white: 0.16).opacity(0.6)
 
     var body: some View {
@@ -32,63 +36,75 @@ struct CountdownManagementView: View {
                 VStack(spacing: 24) {
                     
                     // Widget Configuration Section
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Widget Configuration")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Image(systemName: "slider.horizontal.3")
+                            Text("Widget Configuration")
+                        }
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
                         
                         VStack(alignment: .leading, spacing: 20) {
                             // Event Title Text Field
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: 6) {
                                 Text("Event Title")
-                                    .font(.caption)
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
                                     .foregroundColor(.secondary)
                                 TextField("e.g., Project Launch", text: $item.title)
                                     .textFieldStyle(.plain)
                                     .padding(.horizontal, 14)
-                                    .padding(.vertical, 10)
+                                    .padding(.vertical, 12)
                                     .background(Color(white: 0.12))
-                                    .cornerRadius(8)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .foregroundColor(.white)
                             }
                             
-                            // Date Picker
-                            DatePicker("Target Date", selection: $item.date, displayedComponents: [.date, .hourAndMinute])
-                                .datePickerStyle(.compact)
-                            
-                            // Picker Mode
-                            Picker("Counter Mode", selection: $item.isCountUp) {
-                                Text("Count Down").tag(false)
-                                Text("Count Up").tag(true)
+                            // Date Pickers
+                            HStack {
+                                Label("Target Date", systemImage: "calendar")
+                                    .font(.body)
+                                    .foregroundColor(.white.opacity(0.9))
+                                Spacer()
+                                DatePicker("", selection: $item.date, displayedComponents: [.date, .hourAndMinute])
+                                    .datePickerStyle(.compact)
+                                    .labelsHidden()
                             }
-                            .pickerStyle(.segmented)
+                            .padding(.vertical, 4)
+
+                            Divider().background(Color.white.opacity(0.1))
                             
                             // Blur Amount Slider
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
-                                    Text("Background Blur Style")
+                                    Label("Background Blur", systemImage: "sparkles")
                                     Spacer()
                                     Text("\(Int(item.blurAmount))%")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
+                                .foregroundColor(.white.opacity(0.9))
                                 Slider(value: $item.blurAmount, in: 0...100, step: 5)
+                                    .tint(.accentColor)
                             }
                             
                             // Color Matrix Themes
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: 10) {
                                 Text("Theme Preset")
-                                    .font(.caption)
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
                                     .foregroundColor(.secondary)
-                                HStack(spacing: 12) {
+                                HStack(spacing: 16) {
                                    ForEach(0..<sampleGradients.count, id: \.self) { index in
                                        Circle()
                                            .fill(sampleGradients[index])
-                                           .frame(width: 32, height: 32)
+                                           .frame(width: 36, height: 36)
                                            .overlay(
                                                Circle()
                                                    .stroke(Color.white, lineWidth: item.selectedGradientIndex == index ? 2 : 0)
+                                                   .padding(-4)
                                            )
                                            .onTapGesture {
                                                item.selectedGradientIndex = index
@@ -96,21 +112,25 @@ struct CountdownManagementView: View {
                                            }
                                    }
                                 }
+                                .padding(.vertical, 4)
                             }
                         }
                         .padding(20)
                         .background(containerBackground)
-                        .cornerRadius(12)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .padding(.horizontal)
                     }
                     
-                    // Widget Preview
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Widget Preview")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
+                    // Widget Preview Section
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Image(systemName: "eye")
+                            Text("Widget Preview")
+                        }
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
                         
                         VStack(spacing: 24) {
                             // Small Widget Family Preview
@@ -128,7 +148,7 @@ struct CountdownManagementView: View {
                                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                                         .padding(16)
                                     
-                                    Text(item.isCountUp ? "Days since\n\(item.title.isEmpty ? "Event" : item.title)" : "Days until\n\(item.title.isEmpty ? "Event" : item.title)")
+                                    Text(autoIsCountUp ? "Days since\n\(item.title.isEmpty ? "Event" : item.title)" : "Days until\n\(item.title.isEmpty ? "Event" : item.title)")
                                         .font(.system(size: 12, weight: .semibold))
                                         .foregroundColor(.white.opacity(0.9))
                                         .padding(16)
@@ -147,7 +167,7 @@ struct CountdownManagementView: View {
                                     ZStack {
                                         sampleGradients[item.selectedGradientIndex]
                                             .blur(radius: CGFloat(item.blurAmount / 5))
-                                        Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
+                                        Image(systemName: autoIsCountUp ? "clock.arrow.2.circlepath" : "hourglass")
                                             .font(.title)
                                             .foregroundColor(.white)
                                     }
@@ -163,11 +183,11 @@ struct CountdownManagementView: View {
                                             .font(.system(size: 26, weight: .bold, design: .rounded))
                                             .foregroundColor(.white)
                                         
-                                        Text(item.isCountUp ? "Time has accumulated" : "Time remaining to milestone")
+                                        Text(autoIsCountUp ? "Time has accumulated" : "Time remaining to milestone")
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
                                         
-                                        if !item.isCountUp {
+                                        if !autoIsCountUp {
                                             ProgressView(value: 0.65)
                                                 .progressViewStyle(.linear)
                                                 .tint(.white)
@@ -186,7 +206,7 @@ struct CountdownManagementView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 24)
                         .background(containerBackground)
-                        .cornerRadius(12)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .padding(.horizontal)
                     }
                 }
@@ -195,13 +215,17 @@ struct CountdownManagementView: View {
         }
         .background(Color(white: 0.09))
         .navigationTitle("Moments & Countdowns")
-        .onChange(of: item.title) { save() }
-        .onChange(of: item.date) { save() }
-        .onChange(of: item.isCountUp) { save() }
-        .onChange(of: item.blurAmount) { save() }
+        .onChange(of: item.title) { _, _ in save() }
+        .onChange(of: item.date) { _, _ in
+            item.isCountUp = autoIsCountUp
+            save()
+        }
+        .onChange(of: item.blurAmount) { _, _ in save() }
         .task {
             if let fetchedItem = await CountdownStore.shared.getCountdown() {
                 item = fetchedItem
+                // Ensure correct state on load
+                item.isCountUp = autoIsCountUp
             }
             isLoading = false
         }
@@ -209,6 +233,7 @@ struct CountdownManagementView: View {
             Task {
                 if let fetchedItem = await CountdownStore.shared.getCountdown() {
                     self.item = fetchedItem
+                    self.item.isCountUp = autoIsCountUp
                 }
             }
         }
