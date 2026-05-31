@@ -186,13 +186,6 @@ struct CountdownManagementView: View {
                                         Text(autoIsCountUp ? "Time has accumulated" : "Time remaining to milestone")
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
-                                        
-                                        if !autoIsCountUp {
-                                            ProgressView(value: 0.65)
-                                                .progressViewStyle(.linear)
-                                                .tint(.white)
-                                                .padding(.top, 4)
-                                        }
                                     }
                                     .padding(16)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)

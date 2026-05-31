@@ -68,6 +68,7 @@ struct CountdownWidgetView: View {
                 emptyStateLayout
             }
         }
+        .widgetURL(URL(string: "widstacks://countdown"))
         .containerBackground(.background, for: .widget)
     }
     
@@ -75,12 +76,12 @@ struct CountdownWidgetView: View {
     @ViewBuilder
     private func smallWidgetLayout(item: CountdownItem) -> some View {
         ZStack(alignment: .bottomLeading) {
-            // Safe color extraction falling back gracefully to index 0
             let gradientIndex = item.selectedGradientIndex
             let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
             
             activeGradient
                 .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
+                .ignoresSafeArea()
             
             Text("\(abs(daysRemaining))")
                 .font(.system(size: 42, weight: .bold, design: .rounded))
@@ -104,6 +105,7 @@ struct CountdownWidgetView: View {
                 
                 activeGradient
                     .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
+                    .ignoresSafeArea()
                 
                 Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
                     .font(.title)
@@ -157,5 +159,6 @@ struct CountdownWidget: Widget {
         .configurationDisplayName("Countdown")
         .description("Track the days remaining or elapsed for your key milestones.")
         .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabled()
     }
 }
