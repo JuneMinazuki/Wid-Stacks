@@ -26,7 +26,7 @@ struct TodoManagementView: View {
                 }
                 .padding(.horizontal)
                 
-                // Widget Admin Tasks Container
+                // Widget Configuration Section
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Widget Configuration")
                         .font(.caption)

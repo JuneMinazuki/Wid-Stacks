@@ -19,60 +19,68 @@ struct CountdownManagementView: View {
         let components = calendar.dateComponents([.day], from: start, to: end)
         return components.day ?? 0
     }
+    
+    private let containerBackground = Color(white: 0.16).opacity(0.6)
 
     var body: some View {
         ScrollView {
             if isLoading {
-                ProgressView().padding(100)
+                ProgressView()
+                    .padding(100)
+                    .frame(maxWidth: .infinity)
             } else {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Header Block
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Moments & Countdowns")
-                            .font(.title)
+                VStack(spacing: 24) {
+                    
+                    // Widget Configuration Section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Widget Configuration")
+                            .font(.caption)
                             .fontWeight(.bold)
-                        Text("Configure your desktop canvas tracking parameters.")
-                            .font(.subheadline)
                             .foregroundColor(.secondary)
-                    }
-                    
-                    Divider()
-                    
-                    HStack(alignment: .top, spacing: 32) {
-                        // Left Column: Configuration Controls
+                            .padding(.horizontal)
+                        
                         VStack(alignment: .leading, spacing: 20) {
-                            Text("Widget Configuration")
-                                .font(.headline)
-                            
+                            // Event Title Text Field
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Event Title")
-                                    .font(.caption).foregroundColor(.secondary)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                                 TextField("e.g., Project Launch", text: $item.title)
-                                    .textFieldStyle(.roundedBorder)
+                                    .textFieldStyle(.plain)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 10)
+                                    .background(Color(white: 0.12))
+                                    .cornerRadius(8)
                             }
                             
+                            // Date Picker
                             DatePicker("Target Date", selection: $item.date, displayedComponents: [.date, .hourAndMinute])
                                 .datePickerStyle(.compact)
                             
+                            // Picker Mode
                             Picker("Counter Mode", selection: $item.isCountUp) {
-                                Text("Count Down (Remaining)").tag(false)
-                                Text("Count Up (Elapsed)").tag(true)
+                                Text("Count Down").tag(false)
+                                Text("Count Up").tag(true)
                             }
                             .pickerStyle(.segmented)
                             
+                            // Blur Amount Slider
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
                                     Text("Background Blur Style")
                                     Spacer()
                                     Text("\(Int(item.blurAmount))%")
-                                        .font(.caption).foregroundColor(.secondary)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
                                 Slider(value: $item.blurAmount, in: 0...100, step: 5)
                             }
                             
+                            // Color Matrix Themes
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Theme Preset")
-                                    .font(.caption).foregroundColor(.secondary)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                                 HStack(spacing: 12) {
                                    ForEach(0..<sampleGradients.count, id: \.self) { index in
                                        Circle()
@@ -80,23 +88,31 @@ struct CountdownManagementView: View {
                                            .frame(width: 32, height: 32)
                                            .overlay(
                                                Circle()
-                                                   .stroke(Color.primary, lineWidth: item.selectedGradientIndex == index ? 2 : 0)
+                                                   .stroke(Color.white, lineWidth: item.selectedGradientIndex == index ? 2 : 0)
                                            )
                                            .onTapGesture {
                                                item.selectedGradientIndex = index
-                                               save() // Keeps the instant theme update snappy
+                                               save()
                                            }
                                    }
                                 }
                             }
                         }
-                        .frame(maxWidth: 340)
+                        .padding(20)
+                        .background(containerBackground)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    }
+                    
+                    // Widget Preview
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Widget Preview")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
                         
-                        // Right Column: Canvas Live Widget Previews
-                        VStack(alignment: .leading, spacing: 24) {
-                            Text("Live Layout Previews")
-                                .font(.headline)
-                            
+                        VStack(spacing: 24) {
                             // Small Widget Family Preview
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Small Family (2x2)")
@@ -145,6 +161,7 @@ struct CountdownManagementView: View {
                                         
                                         Text("\(abs(daysRemaining)) Days")
                                             .font(.system(size: 26, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
                                         
                                         Text(item.isCountUp ? "Time has accumulated" : "Time remaining to milestone")
                                             .font(.caption2)
@@ -153,24 +170,31 @@ struct CountdownManagementView: View {
                                         if !item.isCountUp {
                                             ProgressView(value: 0.65)
                                                 .progressViewStyle(.linear)
-                                                .tint(.primary)
+                                                .tint(.white)
                                                 .padding(.top, 4)
                                         }
                                     }
                                     .padding(16)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                                    .background(Color(NSColor.windowBackgroundColor))
+                                    .background(Color(white: 0.12))
                                 }
                                 .frame(width: 320, height: 155)
                                 .cornerRadius(22)
                                 .shadow(radius: 4)
                             }
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                        .background(containerBackground)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
                 }
-                .padding(30)
+                .padding(.vertical)
             }
         }
+        .background(Color(white: 0.09))
+        .navigationTitle("Moments & Countdowns")
         .onChange(of: item.title) { save() }
         .onChange(of: item.date) { save() }
         .onChange(of: item.isCountUp) { save() }
