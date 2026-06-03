@@ -5,6 +5,8 @@ struct CountdownManagementView: View {
         title: "", date: Date(), isCountUp: false, blurAmount: 0.0, selectedGradientIndex: 0
     )
     @State private var isLoading = true
+    @State private var saveTask: Task<Void, Never>? = nil
+    @State private var isSavingInternally = false
     
     let sampleGradients = [
         LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing),
@@ -107,8 +109,10 @@ struct CountdownManagementView: View {
                                                    .padding(-4)
                                            )
                                            .onTapGesture {
-                                               item.selectedGradientIndex = index
-                                               save()
+                                               if item.selectedGradientIndex != index {
+                                                   item.selectedGradientIndex = index
+                                                   save()
+                                               }
                                            }
                                    }
                                 }
@@ -208,31 +212,53 @@ struct CountdownManagementView: View {
         }
         .background(Color(white: 0.09))
         .navigationTitle("Moments & Countdowns")
-        .onChange(of: item.title) { _, _ in save() }
-        .onChange(of: item.date) { _, _ in
-            item.isCountUp = autoIsCountUp
-            save()
+        .onChange(of: item.title) { old, new in
+            if old != new { save() }
         }
-        .onChange(of: item.blurAmount) { _, _ in save() }
+        .onChange(of: item.date) { old, new in
+            if old != new { save() }
+        }
+        .onChange(of: item.blurAmount) { old, new in
+            if old != new { save() }
+        }
         .task {
             if let fetchedItem = await CountdownStore.shared.getCountdown() {
-                item = fetchedItem
-                // Ensure correct state on load
-                item.isCountUp = autoIsCountUp
+                self.item = fetchedItem
             }
             isLoading = false
         }
         .onReceive(NotificationCenter.default.publisher(for: CountdownStore.localDataChangedNotification)) { _ in
+            guard !isSavingInternally else { return }
+            
             Task {
                 if let fetchedItem = await CountdownStore.shared.getCountdown() {
-                    self.item = fetchedItem
-                    self.item.isCountUp = autoIsCountUp
+                    if self.item.title != fetchedItem.title ||
+                        self.item.date != fetchedItem.date ||
+                        self.item.blurAmount != fetchedItem.blurAmount ||
+                        self.item.selectedGradientIndex != fetchedItem.selectedGradientIndex {
+                        
+                        self.item = fetchedItem
+                    }
                 }
             }
         }
     }
-    
+
     private func save() {
-        CountdownStore.shared.saveCountdown(item)
+        saveTask?.cancel()
+        saveTask = Task {
+            isSavingInternally = true
+            
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            guard !Task.isCancelled else { return }
+            
+            var finalItem = item
+            finalItem.isCountUp = autoIsCountUp
+            
+            CountdownStore.shared.saveCountdown(finalItem)
+            
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            isSavingInternally = false
+        }
     }
 }
