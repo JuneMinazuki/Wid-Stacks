@@ -7,4 +7,5 @@ struct CountdownItem: Identifiable, Codable, Sendable {
     var isCountUp: Bool
     var blurAmount: Double
     var selectedGradientIndex: Int
+    var selectedEmoji: String?
 }

@@ -83,6 +83,13 @@ struct CountdownWidgetView: View {
                 .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
                 .ignoresSafeArea()
             
+            if let emoji = item.selectedEmoji {
+                Text(emoji)
+                    .font(.title2)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(14)
+            }
+            
             Text("\(abs(daysRemaining))")
                 .font(.system(size: 42, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
@@ -107,9 +114,14 @@ struct CountdownWidgetView: View {
                     .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
                     .ignoresSafeArea()
                 
-                Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
-                    .font(.title)
-                    .foregroundColor(.white)
+                if let emoji = item.selectedEmoji {
+                    Text(emoji)
+                        .font(.system(size: 36))
+                } else {
+                    Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
+                        .font(.title)
+                        .foregroundColor(.white)
+                }
             }
             .frame(width: 100)
             

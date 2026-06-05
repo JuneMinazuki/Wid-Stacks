@@ -2,11 +2,13 @@ import SwiftUI
 
 struct CountdownManagementView: View {
     @State private var item: CountdownItem = CountdownItem(
-        title: "", date: Date(), isCountUp: false, blurAmount: 0.0, selectedGradientIndex: 0
+        title: "", date: Date(), isCountUp: false, blurAmount: 0.0, selectedGradientIndex: 0, selectedEmoji: nil
     )
     @State private var isLoading = true
     @State private var saveTask: Task<Void, Never>? = nil
     @State private var isSavingInternally = false
+    
+    private let availableEmojis = ["🎯", "🚀", "🎂", "🎓", "💍", "🏖️", "🎄", "🍿", "💼", "🏋️‍♂️", "🎮", "🏡"]
     
     let sampleGradients = [
         LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing),
@@ -78,6 +80,53 @@ struct CountdownManagementView: View {
 
                             Divider().background(Color.white.opacity(0.1))
                             
+                            // Emoji Picker
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack {
+                                    Label("Widget Icon Emoji", systemImage: "face.smiling")
+                                        .font(.body)
+                                        .foregroundColor(.white.opacity(0.9))
+                                    Spacer()
+                                    if item.selectedEmoji != nil {
+                                        Button(action: {
+                                            item.selectedEmoji = nil
+                                            save()
+                                        }) {
+                                            Text("Clear")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.red.opacity(0.8))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(availableEmojis, id: \.self) { emoji in
+                                            Text(emoji)
+                                                .font(.title2)
+                                                .frame(width: 44, height: 44)
+                                                .background(item.selectedEmoji == emoji ? Color.white.opacity(0.15) : Color(white: 0.12))
+                                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                        .stroke(Color.accentColor, lineWidth: item.selectedEmoji == emoji ? 2 : 0)
+                                                )
+                                                .contentShape(Rectangle())
+                                                .onTapGesture {
+                                                    if item.selectedEmoji == emoji { item.selectedEmoji = nil }
+                                                    else { item.selectedEmoji = emoji }
+                                                    save()
+                                                }
+                                        }
+                                    }
+                                    .padding(.vertical, 4)
+                                }
+                            }
+                            
+                            Divider().background(Color.white.opacity(0.1))
+                            
                             // Blur Amount Slider
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
@@ -146,6 +195,13 @@ struct CountdownManagementView: View {
                                     sampleGradients[item.selectedGradientIndex]
                                         .blur(radius: CGFloat(item.blurAmount / 5))
                                     
+                                    if let emoji = item.selectedEmoji {
+                                        Text(emoji)
+                                            .font(.title)
+                                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                                            .padding(16)
+                                    }
+                                    
                                     Text("\(abs(daysRemaining))")
                                         .font(.system(size: 42, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
@@ -171,9 +227,15 @@ struct CountdownManagementView: View {
                                     ZStack {
                                         sampleGradients[item.selectedGradientIndex]
                                             .blur(radius: CGFloat(item.blurAmount / 5))
-                                        Image(systemName: autoIsCountUp ? "clock.arrow.2.circlepath" : "hourglass")
-                                            .font(.title)
-                                            .foregroundColor(.white)
+                                        
+                                        if let emoji = item.selectedEmoji {
+                                            Text(emoji)
+                                                .font(.system(size: 34))
+                                        } else {
+                                            Image(systemName: autoIsCountUp ? "clock.arrow.2.circlepath" : "hourglass")
+                                                .font(.title)
+                                                .foregroundColor(.white)
+                                        }
                                     }
                                     .frame(width: 110)
                                     
@@ -212,15 +274,11 @@ struct CountdownManagementView: View {
         }
         .background(Color(white: 0.09))
         .navigationTitle("Moments & Countdowns")
-        .onChange(of: item.title) { old, new in
-            if old != new { save() }
-        }
-        .onChange(of: item.date) { old, new in
-            if old != new { save() }
-        }
-        .onChange(of: item.blurAmount) { old, new in
-            if old != new { save() }
-        }
+        
+        .onChange(of: item.title) { old, new in if old != new { save() } }
+        .onChange(of: item.date) { old, new in if old != new { save() } }
+        .onChange(of: item.blurAmount) { old, new in if old != new { save() } }
+        .onChange(of: item.selectedEmoji) { old, new in if old != new { save() } }
         .task {
             if let fetchedItem = await CountdownStore.shared.getCountdown() {
                 self.item = fetchedItem
@@ -235,7 +293,8 @@ struct CountdownManagementView: View {
                     if self.item.title != fetchedItem.title ||
                         self.item.date != fetchedItem.date ||
                         self.item.blurAmount != fetchedItem.blurAmount ||
-                        self.item.selectedGradientIndex != fetchedItem.selectedGradientIndex {
+                        self.item.selectedGradientIndex != fetchedItem.selectedGradientIndex ||
+                        self.item.selectedEmoji != fetchedItem.selectedEmoji {
                         
                         self.item = fetchedItem
                     }
