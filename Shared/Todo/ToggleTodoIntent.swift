@@ -19,6 +19,7 @@ struct ToggleTodoIntent: AppIntent {
         guard let uuid = UUID(uuidString: id) else { return .result() }
         
         await TodoStore.shared.toggleTodo(id: uuid)
+        WidgetCenter.shared.reloadAllTimelines()
         
         return .result()
     }
