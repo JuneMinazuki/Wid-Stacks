@@ -8,4 +8,5 @@ struct CountdownItem: Identifiable, Codable, Sendable {
     var blurAmount: Double
     var selectedGradientIndex: Int
     var selectedEmoji: String?
+    var useCustomBackground: Bool?
 }

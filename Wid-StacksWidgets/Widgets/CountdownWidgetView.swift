@@ -6,7 +6,7 @@ struct CountdownProvider: TimelineProvider {
     func placeholder(in context: Context) -> CountdownEntry {
         CountdownEntry(
             date: Date(),
-            item: CountdownItem(title: "Milestone Launch", date: Date().addingTimeInterval(86400 * 10), isCountUp: false, blurAmount: 20, selectedGradientIndex: 0)
+            item: CountdownItem(title: "Milestone Launch", date: Date().addingTimeInterval(86400 * 10), isCountUp: false, blurAmount: 20, selectedGradientIndex: 0, useCustomBackground: false)
         )
     }
 
@@ -76,12 +76,19 @@ struct CountdownWidgetView: View {
     @ViewBuilder
     private func smallWidgetLayout(item: CountdownItem) -> some View {
         ZStack(alignment: .bottomLeading) {
-            let gradientIndex = item.selectedGradientIndex
-            let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
-            
-            activeGradient
-                .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
-                .ignoresSafeArea()
+            Group {
+                if item.useCustomBackground == true, let nsImage = NSImage(contentsOf: CountdownStore.shared.backgroundImageURL) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } else {
+                    let gradientIndex = item.selectedGradientIndex
+                    let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
+                    activeGradient
+                }
+            }
+            .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
+            .ignoresSafeArea()
             
             if let emoji = item.selectedEmoji {
                 Text(emoji)
@@ -107,12 +114,19 @@ struct CountdownWidgetView: View {
     private func mediumWidgetLayout(item: CountdownItem) -> some View {
         HStack(spacing: 0) {
             ZStack {
-                let gradientIndex = item.selectedGradientIndex
-                let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
-                
-                activeGradient
-                    .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
-                    .ignoresSafeArea()
+                Group {
+                    if item.useCustomBackground == true, let nsImage = NSImage(contentsOf: CountdownStore.shared.backgroundImageURL) {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else {
+                        let gradientIndex = item.selectedGradientIndex
+                        let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
+                        activeGradient
+                    }
+                }
+                .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
+                .ignoresSafeArea()
                 
                 if let emoji = item.selectedEmoji {
                     Text(emoji)
@@ -124,6 +138,7 @@ struct CountdownWidgetView: View {
                 }
             }
             .frame(width: 100)
+            .clipped()
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title.isEmpty ? "MILESTONE" : item.title.uppercased())

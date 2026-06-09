@@ -1,12 +1,14 @@
 import SwiftUI
+import PhotosUI
 
 struct CountdownManagementView: View {
     @State private var item: CountdownItem = CountdownItem(
-        title: "", date: Date(), isCountUp: false, blurAmount: 0.0, selectedGradientIndex: 0, selectedEmoji: nil
+        title: "", date: Date(), isCountUp: false, blurAmount: 0.0, selectedGradientIndex: 0, selectedEmoji: nil, useCustomBackground: false
     )
     @State private var isLoading = true
     @State private var saveTask: Task<Void, Never>? = nil
     @State private var isSavingInternally = false
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
     
     private let availableEmojis = ["🎯", "🚀", "🎂", "🎓", "💍", "🏖️", "🎄", "🍿", "💼", "🏋️‍♂️", "🎮", "🏡"]
     
@@ -141,6 +143,46 @@ struct CountdownManagementView: View {
                                     .tint(.accentColor)
                             }
                             
+                            Divider().background(Color.white.opacity(0.1))
+                            
+                            // Custom Image Background Picker
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Custom Background Photo")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack(spacing: 12) {
+                                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                                        Label((item.useCustomBackground ?? false) ? "Change Photo" : "Choose Photo", systemImage: "photo.on.rectangle")
+                                            .font(.body)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 14)
+                                            .padding(.vertical, 10)
+                                            .background(Color(white: 0.12))
+                                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    if item.useCustomBackground == true {
+                                        Button(action: {
+                                            item.useCustomBackground = false
+                                            CountdownStore.shared.deleteBackgroundImage()
+                                            save()
+                                        }) {
+                                            Text("Remove Photo")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.red.opacity(0.8))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+
+                            Divider().background(Color.white.opacity(0.1))
+                            
                             // Color Matrix Themes
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("Theme Preset")
@@ -192,8 +234,17 @@ struct CountdownManagementView: View {
                                     .font(.caption).foregroundColor(.secondary)
                                 
                                 ZStack(alignment: .bottomLeading) {
-                                    sampleGradients[item.selectedGradientIndex]
-                                        .blur(radius: CGFloat(item.blurAmount / 5))
+                                    if item.useCustomBackground == true, let nsImage = NSImage(contentsOf: CountdownStore.shared.backgroundImageURL) {
+                                        Image(nsImage: nsImage)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 155, height: 155)
+                                            .blur(radius: CGFloat(item.blurAmount / 5))
+                                            .clipped()
+                                    } else {
+                                        sampleGradients[item.selectedGradientIndex]
+                                            .blur(radius: CGFloat(item.blurAmount / 5))
+                                    }
                                     
                                     if let emoji = item.selectedEmoji {
                                         Text(emoji)
@@ -225,8 +276,17 @@ struct CountdownManagementView: View {
                                 
                                 HStack(spacing: 0) {
                                     ZStack {
-                                        sampleGradients[item.selectedGradientIndex]
-                                            .blur(radius: CGFloat(item.blurAmount / 5))
+                                        if item.useCustomBackground == true, let nsImage = NSImage(contentsOf: CountdownStore.shared.backgroundImageURL) {
+                                            Image(nsImage: nsImage)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 110, height: 155)
+                                                .blur(radius: CGFloat(item.blurAmount / 5))
+                                                .clipped()
+                                        } else {
+                                            sampleGradients[item.selectedGradientIndex]
+                                                .blur(radius: CGFloat(item.blurAmount / 5))
+                                        }
                                         
                                         if let emoji = item.selectedEmoji {
                                             Text(emoji)
@@ -279,6 +339,15 @@ struct CountdownManagementView: View {
         .onChange(of: item.date) { old, new in if old != new { save() } }
         .onChange(of: item.blurAmount) { old, new in if old != new { save() } }
         .onChange(of: item.selectedEmoji) { old, new in if old != new { save() } }
+        .onChange(of: selectedPhotoItem) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    CountdownStore.shared.saveBackgroundImage(data: data)
+                    item.useCustomBackground = true
+                    save()
+                }
+            }
+        }
         .task {
             if let fetchedItem = await CountdownStore.shared.getCountdown() {
                 self.item = fetchedItem
@@ -294,7 +363,8 @@ struct CountdownManagementView: View {
                         self.item.date != fetchedItem.date ||
                         self.item.blurAmount != fetchedItem.blurAmount ||
                         self.item.selectedGradientIndex != fetchedItem.selectedGradientIndex ||
-                        self.item.selectedEmoji != fetchedItem.selectedEmoji {
+                        self.item.selectedEmoji != fetchedItem.selectedEmoji ||
+                        self.item.useCustomBackground != fetchedItem.useCustomBackground {
                         
                         self.item = fetchedItem
                     }

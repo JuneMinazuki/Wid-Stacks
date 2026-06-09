@@ -28,27 +28,42 @@ class CountdownStore {
         }
     }
 
-    private var fileURL: URL {
+    private var baseFolderURL: URL {
         if let pw = getpwuid(getuid()), let homeDirCStr = pw.pointee.pw_dir {
             let homeURL = URL(fileURLWithPath: String(cString: homeDirCStr))
-            let targetFolder = homeURL
+            return homeURL
                 .appendingPathComponent("Library")
                 .appendingPathComponent("Application Support")
                 .appendingPathComponent(folderName)
-            
-            if !FileManager.default.fileExists(atPath: targetFolder.path) {
-                try? FileManager.default.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
-            }
-            return targetFolder.appendingPathComponent(fileName)
         }
         
         let fileManager = FileManager.default
         let fallback = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let targetFolder = fallback.appendingPathComponent(folderName)
-        if !fileManager.fileExists(atPath: targetFolder.path) {
-            try? fileManager.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
+        return fallback.appendingPathComponent(folderName)
+    }
+
+    private var fileURL: URL {
+        let targetFolder = baseFolderURL
+        if !FileManager.default.fileExists(atPath: targetFolder.path) {
+            try? FileManager.default.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
         }
         return targetFolder.appendingPathComponent(fileName)
+    }
+
+    var backgroundImageURL: URL {
+        return baseFolderURL.appendingPathComponent("background.png")
+    }
+
+    func saveBackgroundImage(data: Data) {
+        let targetFolder = baseFolderURL
+        if !FileManager.default.fileExists(atPath: targetFolder.path) {
+            try? FileManager.default.createDirectory(at: targetFolder, withIntermediateDirectories: true, attributes: nil)
+        }
+        try? data.write(to: backgroundImageURL, options: .atomic)
+    }
+
+    func deleteBackgroundImage() {
+        try? FileManager.default.removeItem(at: backgroundImageURL)
     }
 
     func getCountdown() async -> CountdownItem? {
@@ -56,7 +71,7 @@ class CountdownStore {
             if let diskItem = await loadFromDisk() {
                 return diskItem
             } else {
-                let defaultItem = CountdownItem(title: "New Milestone", date: Date().addingTimeInterval(86400 * 7), isCountUp: false, blurAmount: 10, selectedGradientIndex: 0)
+                let defaultItem = CountdownItem(title: "New Milestone", date: Date().addingTimeInterval(86400 * 7), isCountUp: false, blurAmount: 10, selectedGradientIndex: 0, useCustomBackground: false)
                 self.saveCountdown(defaultItem, reloadWidget: false)
                 return defaultItem
             }
