@@ -87,76 +87,86 @@ struct CountdownWidgetView: View {
                     activeGradient
                 }
             }
-            .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
-            .ignoresSafeArea()
+            .blur(radius: max(0, CGFloat(item.blurAmount / 5)))
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            .clipped()
             
             if let emoji = item.selectedEmoji {
                 Text(emoji)
-                    .font(.title2)
+                    .font(.title)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(14)
             }
             
             Text("\(abs(daysRemaining))")
-                .font(.system(size: 42, weight: .bold, design: .rounded))
+                .font(.system(size: 40, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .padding(16)
+                .padding(14)
+                .minimumScaleFactor(0.8)
             
             Text(item.isCountUp ? "Days since\n\(item.title.isEmpty ? "Event" : item.title)" : "Days until\n\(item.title.isEmpty ? "Event" : item.title)")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(.white.opacity(0.9))
-                .padding(16)
+                .lineLimit(2)
+                .padding(14)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     @ViewBuilder
     private func mediumWidgetLayout(item: CountdownItem) -> some View {
-        HStack(spacing: 0) {
-            ZStack {
-                Group {
-                    if item.useCustomBackground == true, let nsImage = NSImage(contentsOf: CountdownStore.shared.backgroundImageURL) {
-                        Image(nsImage: nsImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
+        GeometryReader { geometry in
+            HStack(spacing: 0) {
+                ZStack {
+                    Group {
+                        if item.useCustomBackground == true, let nsImage = NSImage(contentsOf: CountdownStore.shared.backgroundImageURL) {
+                            Image(nsImage: nsImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } else {
+                            let gradientIndex = item.selectedGradientIndex
+                            let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
+                            activeGradient
+                        }
+                    }
+                    .blur(radius: max(0, CGFloat(item.blurAmount / 5)))
+                    
+                    if let emoji = item.selectedEmoji {
+                        Text(emoji)
+                            .font(.system(size: 34))
                     } else {
-                        let gradientIndex = item.selectedGradientIndex
-                        let activeGradient = sampleGradients.indices.contains(gradientIndex) ? sampleGradients[gradientIndex] : sampleGradients[0]
-                        activeGradient
+                        Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
+                            .font(.title)
+                            .foregroundColor(.white)
                     }
                 }
-                .blur(radius: max(0, CGFloat(item.blurAmount / 10)))
-                .ignoresSafeArea()
+                .frame(width: geometry.size.width * 0.35)
+                .clipped()
                 
-                if let emoji = item.selectedEmoji {
-                    Text(emoji)
-                        .font(.system(size: 36))
-                } else {
-                    Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
-                        .font(.title)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.title.isEmpty ? "EVENT" : item.title.uppercased())
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                    
+                    Text("\(abs(daysRemaining)) Days")
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
+                        .minimumScaleFactor(0.9)
+                    
+                    Text(item.isCountUp ? "Time has accumulated" : "Time remaining to milestone")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
+                .padding(14)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .background(Color(white: 0.12))
             }
-            .frame(width: 100)
-            .clipped()
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.title.isEmpty ? "MILESTONE" : item.title.uppercased())
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                Text("\(abs(daysRemaining)) Days")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                
-                Text(item.isCountUp ? "Time accumulated since date" : "Time remaining to milestone")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     @ViewBuilder

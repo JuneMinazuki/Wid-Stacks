@@ -264,6 +264,7 @@ struct CountdownManagementView: View {
                                         .padding(16)
                                 }
                                 .frame(width: 155, height: 155)
+                                .clipped()
                                 .cornerRadius(22)
                                 .shadow(radius: 4)
                             }
