@@ -8,7 +8,6 @@ struct CountdownManagementView: View {
     @State private var isLoading = true
     @State private var saveTask: Task<Void, Never>? = nil
     @State private var isSavingInternally = false
-    @State private var selectedPhotoItem: PhotosPickerItem? = nil
     
     private let availableEmojis = ["🎯", "🚀", "🎂", "🎓", "💍", "🏖️", "🎄", "🍿", "💼", "🏋️‍♂️", "🎮", "🏡"]
     
@@ -153,7 +152,7 @@ struct CountdownManagementView: View {
                                     .foregroundColor(.secondary)
                                 
                                 HStack(spacing: 12) {
-                                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                                    Button(action: selectPhotoFromFinder) {
                                         Label((item.useCustomBackground ?? false) ? "Change Photo" : "Choose Photo", systemImage: "photo.on.rectangle")
                                             .font(.body)
                                             .foregroundColor(.white)
@@ -339,15 +338,6 @@ struct CountdownManagementView: View {
         .onChange(of: item.date) { old, new in if old != new { save() } }
         .onChange(of: item.blurAmount) { old, new in if old != new { save() } }
         .onChange(of: item.selectedEmoji) { old, new in if old != new { save() } }
-        .onChange(of: selectedPhotoItem) { _, newItem in
-            Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                    CountdownStore.shared.saveBackgroundImage(data: data)
-                    item.useCustomBackground = true
-                    save()
-                }
-            }
-        }
         .task {
             if let fetchedItem = await CountdownStore.shared.getCountdown() {
                 self.item = fetchedItem
@@ -388,6 +378,27 @@ struct CountdownManagementView: View {
             
             try? await Task.sleep(nanoseconds: 50_000_000)
             isSavingInternally = false
+        }
+    }
+    
+    private func selectPhotoFromFinder() {
+        let openPanel = NSOpenPanel()
+        openPanel.prompt = "Select Background"
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = false
+        openPanel.canChooseFiles = true
+        openPanel.allowedContentTypes = [.image]
+
+        openPanel.begin { response in
+            if response == .OK, let url = openPanel.url {
+                if let data = try? Data(contentsOf: url) {
+                    DispatchQueue.main.async {
+                        CountdownStore.shared.saveBackgroundImage(data: data)
+                        item.useCustomBackground = true
+                        save()
+                    }
+                }
+            }
         }
     }
 }
