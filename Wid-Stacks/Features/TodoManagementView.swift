@@ -131,10 +131,8 @@ struct TodoManagementView: View {
                 refreshData()
             }
         }
-        .onOpenURL { url in
-            if url.absoluteString == "todo://add" {
-                showAddTaskSheet = true
-            }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OpenAddTaskSheet"))) { _ in
+            showAddTaskSheet = true
             refreshData()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willBecomeActiveNotification)) { _ in

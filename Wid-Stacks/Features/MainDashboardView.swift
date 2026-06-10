@@ -55,13 +55,18 @@ struct MainDashboardView: View {
         }
         // Route to appropriate sidebar tab
         .onOpenURL { url in
+            NSApp.activate(ignoringOtherApps: true)
             guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return }
             
-            if url.host == "add" || url.absoluteString == "todo://add" {
+            if url.absoluteString == "todo://add" {
                 selectedWidget = .todo
-            } else if url.host == "countdown" || url.absoluteString.contains("countdown") {
-                selectedWidget = .countdown
-            } else if url.host == "toggle" {
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: Notification.Name("OpenAddTaskSheet"), object: nil)
+                }
+                return
+            }
+            
+            if url.host == "toggle" {
                 selectedWidget = .todo
                 if let queryItem = components.queryItems?.first(where: { $0.name == "id" }),
                    let idString = queryItem.value,
@@ -71,6 +76,14 @@ struct MainDashboardView: View {
                         NotificationCenter.default.post(name: Notification.Name("RefreshTodoData"), object: nil)
                     }
                 }
+                return
+            }
+            
+            let urlString = url.absoluteString.lowercased()
+            if urlString.contains("todo") {
+                selectedWidget = .todo
+            } else if urlString.contains("countdown") {
+                selectedWidget = .countdown
             }
         }
     }

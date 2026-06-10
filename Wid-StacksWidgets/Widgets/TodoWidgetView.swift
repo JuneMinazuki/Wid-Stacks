@@ -87,6 +87,7 @@ struct TodoWidgetView: View {
                 largeWidgetLayout
             }
         }
+        .widgetURL(URL(string: "widstacks://todo"))
         .containerBackground(.background, for: .widget)
     }
     
