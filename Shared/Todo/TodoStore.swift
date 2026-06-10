@@ -17,7 +17,7 @@ class TodoStore {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task {
+            Task { @MainActor in
                 if await self?.refreshCacheIfNeeded() == true {
                     NotificationCenter.default.post(name: NSNotification.Name("RefreshTodoData"), object: nil)
                 }
@@ -96,7 +96,7 @@ class TodoStore {
             return false
         }
         
-        cachedTodos = sortedTodos
+        self.cachedTodos = sortedTodos
         let url = self.fileURL
         
         Task {
@@ -104,7 +104,8 @@ class TodoStore {
             encoder.outputFormat = .binary
             guard let data = try? encoder.encode(sortedTodos) else { return }
             
-            let newModDate = await Task.detached(priority: .background) { () -> Date? in
+            // Wait for file to complete writing
+            let newModDate = await Task.detached(priority: .userInitiated) { () -> Date? in
                 var modificationDate: Date? = nil
                 let coordinator = NSFileCoordinator()
                 var error: NSError?
