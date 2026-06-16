@@ -95,21 +95,23 @@ struct CountdownWidgetView: View {
                 Text(emoji)
                     .font(.title)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .padding(14)
+                    .padding(12)
             }
             
             Text("\(abs(daysRemaining))")
-                .font(.system(size: 40, weight: .bold, design: .rounded))
+                .font(.system(size: 52, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .padding(14)
-                .minimumScaleFactor(0.8)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .minimumScaleFactor(0.6)
             
             Text(item.isCountUp ? "Days since\n\(item.title.isEmpty ? "Event" : item.title)" : "Days until\n\(item.title.isEmpty ? "Event" : item.title)")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.white.opacity(0.9))
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.white)
                 .lineLimit(2)
-                .padding(14)
+                .minimumScaleFactor(0.8)
+                .padding(12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -134,34 +136,35 @@ struct CountdownWidgetView: View {
                     
                     if let emoji = item.selectedEmoji {
                         Text(emoji)
-                            .font(.system(size: 34))
+                            .font(.system(size: 38))
                     } else {
                         Image(systemName: item.isCountUp ? "clock.arrow.2.circlepath" : "hourglass")
-                            .font(.title)
+                            .font(.system(size: 32))
                             .foregroundColor(.white)
                     }
                 }
-                .frame(width: geometry.size.width * 0.35)
+                .frame(width: geometry.size.width * 0.32)
                 .clipped()
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title.isEmpty ? "EVENT" : item.title.uppercased())
-                        .font(.caption)
+                        .font(.caption2)
                         .fontWeight(.bold)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                     
                     Text("\(abs(daysRemaining)) Days")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                        .minimumScaleFactor(0.9)
+                        .minimumScaleFactor(0.8)
                     
                     Text(item.isCountUp ? "Time has accumulated" : "Time remaining to milestone")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.8))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
-                .padding(14)
+                .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .background(Color(white: 0.12))
             }

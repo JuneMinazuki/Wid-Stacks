@@ -249,19 +249,22 @@ struct CountdownManagementView: View {
                                         Text(emoji)
                                             .font(.title)
                                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                            .padding(16)
+                                            .padding(12)
                                     }
                                     
                                     Text("\(abs(daysRemaining))")
-                                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                                        .font(.system(size: 52, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
                                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                                        .padding(16)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .minimumScaleFactor(0.6)
                                     
                                     Text(autoIsCountUp ? "Days since\n\(item.title.isEmpty ? "Event" : item.title)" : "Days until\n\(item.title.isEmpty ? "Event" : item.title)")
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(.white.opacity(0.9))
-                                        .padding(16)
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .minimumScaleFactor(0.8)
+                                        .padding(12)
                                 }
                                 .frame(width: 155, height: 155)
                                 .clipped()
@@ -280,7 +283,7 @@ struct CountdownManagementView: View {
                                             Image(nsImage: nsImage)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
-                                                .frame(width: 110, height: 155)
+                                                .frame(width: 102, height: 155)
                                                 .blur(radius: CGFloat(item.blurAmount / 5))
                                                 .clipped()
                                         } else {
@@ -290,30 +293,32 @@ struct CountdownManagementView: View {
                                         
                                         if let emoji = item.selectedEmoji {
                                             Text(emoji)
-                                                .font(.system(size: 34))
+                                                .font(.system(size: 38))
                                         } else {
                                             Image(systemName: autoIsCountUp ? "clock.arrow.2.circlepath" : "hourglass")
-                                                .font(.title)
+                                                .font(.system(size: 32))
                                                 .foregroundColor(.white)
                                         }
                                     }
-                                    .frame(width: 110)
+                                    .frame(width: 102)
                                     
-                                    VStack(alignment: .leading, spacing: 6) {
+                                    VStack(alignment: .leading, spacing: 4) {
                                         Text((item.title.isEmpty ? "Event" : item.title).uppercased())
-                                            .font(.caption)
+                                            .font(.caption2)
                                             .fontWeight(.bold)
                                             .foregroundColor(.secondary)
                                         
                                         Text("\(abs(daysRemaining)) Days")
-                                            .font(.system(size: 26, weight: .bold, design: .rounded))
+                                            .font(.system(size: 34, weight: .bold, design: .rounded))
                                             .foregroundColor(.white)
+                                            .minimumScaleFactor(0.8)
                                         
                                         Text(autoIsCountUp ? "Time has accumulated" : "Time remaining to milestone")
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white.opacity(0.8))
+                                            .minimumScaleFactor(0.8)
                                     }
-                                    .padding(16)
+                                    .padding(.horizontal, 16)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                                     .background(Color(white: 0.12))
                                 }
