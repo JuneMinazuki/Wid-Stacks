@@ -83,7 +83,7 @@ class TodoStore {
         return result.0
     }
 
-    func saveTodos(_ todos: [TodoItem], reloadWidget: Bool = true) {
+    func saveTodos(_ todos: [TodoItem], reloadWidget: Bool = true) async {
         // Sorts tasks to show uncompleted (false) first
         let sortedTodos = todos.sorted { lhs, rhs in
             if lhs.isCompleted != rhs.isCompleted {
@@ -99,58 +99,55 @@ class TodoStore {
         self.cachedTodos = sortedTodos
         let url = self.fileURL
         
-        Task {
-            let encoder = PropertyListEncoder()
-            encoder.outputFormat = .binary
-            guard let data = try? encoder.encode(sortedTodos) else { return }
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .binary
+        guard let data = try? encoder.encode(sortedTodos) else { return }
+        
+        // Await the file writing completely
+        let newModDate = await Task.detached(priority: .userInitiated) { () -> Date? in
+            var modificationDate: Date? = nil
+            let coordinator = NSFileCoordinator()
+            var error: NSError?
             
-            // Wait for file to complete writing
-            let newModDate = await Task.detached(priority: .userInitiated) { () -> Date? in
-                var modificationDate: Date? = nil
-                let coordinator = NSFileCoordinator()
-                var error: NSError?
+            coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { writeURL in
+                try? data.write(to: writeURL, options: .atomic)
                 
-                coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { writeURL in
-                    try? data.write(to: writeURL, options: .atomic)
-                    
-                    let attributes = try? FileManager.default.attributesOfItem(atPath: writeURL.path)
-                    modificationDate = attributes?[.modificationDate] as? Date
-                }
-                return modificationDate
-            }.value
-            
-            self.lastModificationDate = newModDate
-            
-            // Notify app and widget to refresh
-            DistributedNotificationCenter.default().postNotificationName(
-                NSNotification.Name("com.juneminazuki.WidStacks.DataChanged"),
-                object: nil,
-                userInfo: nil,
-                deliverImmediately: true
-            )
-            
-            if reloadWidget {
-                WidgetCenter.shared.reloadAllTimelines()
+                let attributes = try? FileManager.default.attributesOfItem(atPath: writeURL.path)
+                modificationDate = attributes?[.modificationDate] as? Date
             }
+            return modificationDate
+        }.value
+        
+        self.lastModificationDate = newModDate
+        
+        // Notify app and widget to refresh
+        DistributedNotificationCenter.default().postNotificationName(
+            NSNotification.Name("com.juneminazuki.WidStacks.DataChanged"),
+            object: nil,
+            userInfo: nil,
+            deliverImmediately: true
+        )
+        
+        if reloadWidget {
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
     
     func toggleTodo(id: UUID) async {
         var currentTodos = await getTodos()
-        
         guard let index = currentTodos.firstIndex(where: { $0.id == id }) else { return }
         
         currentTodos[index].isCompleted.toggle()
         currentTodos[index].completedAt = currentTodos[index].isCompleted ? Date() : nil
         
-        saveTodos(currentTodos, reloadWidget: true)
+        await saveTodos(currentTodos, reloadWidget: true)
     }
     
     // Instantly remove completed task
     func purgeAllCompletedItems() async {
         let todos = await getTodos()
         let filtered = todos.filter { !$0.isCompleted }
-        saveTodos(filtered)
+        await saveTodos(filtered)
     }
 
     // For auto remove after midnight
@@ -167,7 +164,7 @@ class TodoStore {
         }
         
         if filtered.count != todos.count {
-            saveTodos(filtered, reloadWidget: reloadWidget)
+            await saveTodos(filtered, reloadWidget: reloadWidget)
         }
     }
     
