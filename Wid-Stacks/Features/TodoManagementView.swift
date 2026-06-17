@@ -145,6 +145,11 @@ struct TodoManagementView: View {
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("RefreshTodoData"))) { _ in
             refreshData()
         }
+        .onOpenURL { url in
+            if url.absoluteString == "todo://add" {
+                NotificationCenter.default.post(name: Notification.Name("OpenAddTaskSheet"), object: nil)
+            }
+        }
         .sheet(isPresented: $showAddTaskSheet) {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Add New Task")
