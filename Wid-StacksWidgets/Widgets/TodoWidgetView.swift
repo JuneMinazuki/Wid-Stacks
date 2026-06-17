@@ -210,12 +210,10 @@ struct TodoWidgetView: View {
         HStack(spacing: 8) {
             Button(intent: ToggleTodoIntent(id: item.id)) {
                 Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(item.isCompleted ? .green : .secondary)
-                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .frame(width: 28, height: 28, alignment: .leading)
 
             Text(item.title)
                 .font(.subheadline)
