@@ -4,12 +4,14 @@ struct MainDashboardView: View {
     // Enum for each widget type
     enum WidgetType: String, CaseIterable, Identifiable {
         case todo = "To-Do List"
+        case countdown = "Countdown"
         
         var id: String { self.rawValue }
         
         var icon: String {
             switch self {
             case .todo: return "checkmark.circle.fill"
+            case .countdown: return "hourglass"
             }
         }
     }
@@ -33,6 +35,8 @@ struct MainDashboardView: View {
                 switch selectedWidget {
                 case .todo:
                     TodoManagementView()
+                case .countdown:
+                    CountdownManagementView()
                 }
             } else {
                 // Placeholder state for unknown state
@@ -51,11 +55,18 @@ struct MainDashboardView: View {
         }
         // Route to appropriate sidebar tab
         .onOpenURL { url in
+            NSApp.activate(ignoringOtherApps: true)
             guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return }
             
-            if url.host == "add" || url.absoluteString == "todo://add" {
+            if url.absoluteString == "todo://add" {
                 selectedWidget = .todo
-            } else if url.host == "toggle" {
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: Notification.Name("OpenAddTaskSheet"), object: nil)
+                }
+                return
+            }
+            
+            if url.host == "toggle" {
                 selectedWidget = .todo
                 if let queryItem = components.queryItems?.first(where: { $0.name == "id" }),
                    let idString = queryItem.value,
@@ -65,6 +76,14 @@ struct MainDashboardView: View {
                         NotificationCenter.default.post(name: Notification.Name("RefreshTodoData"), object: nil)
                     }
                 }
+                return
+            }
+            
+            let urlString = url.absoluteString.lowercased()
+            if urlString.contains("todo") {
+                selectedWidget = .todo
+            } else if urlString.contains("countdown") {
+                selectedWidget = .countdown
             }
         }
     }

@@ -26,7 +26,7 @@ struct TodoManagementView: View {
                 }
                 .padding(.horizontal)
                 
-                // Widget Admin Tasks Container
+                // Widget Configuration Section
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Widget Configuration")
                         .font(.caption)
@@ -131,10 +131,8 @@ struct TodoManagementView: View {
                 refreshData()
             }
         }
-        .onOpenURL { url in
-            if url.absoluteString == "todo://add" {
-                showAddTaskSheet = true
-            }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OpenAddTaskSheet"))) { _ in
+            showAddTaskSheet = true
             refreshData()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willBecomeActiveNotification)) { _ in
@@ -146,6 +144,11 @@ struct TodoManagementView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("RefreshTodoData"))) { _ in
             refreshData()
+        }
+        .onOpenURL { url in
+            if url.absoluteString == "todo://add" {
+                NotificationCenter.default.post(name: Notification.Name("OpenAddTaskSheet"), object: nil)
+            }
         }
         .sheet(isPresented: $showAddTaskSheet) {
             VStack(alignment: .leading, spacing: 20) {
@@ -176,7 +179,7 @@ struct TodoManagementView: View {
                         Task {
                             var currentTodos = await TodoStore.shared.getTodos()
                             currentTodos.append(newItem)
-                            TodoStore.shared.saveTodos(currentTodos, reloadWidget: true)
+                            await TodoStore.shared.saveTodos(currentTodos, reloadWidget: true)
                             newTaskTitle = ""
                             showAddTaskSheet = false
                             refreshData()
@@ -214,7 +217,7 @@ struct TodoManagementView: View {
         Task {
             var currentTodos = await TodoStore.shared.getTodos()
             currentTodos.removeAll(where: { $0.id == todo.id })
-            TodoStore.shared.saveTodos(currentTodos)
+            await TodoStore.shared.saveTodos(currentTodos)
             refreshData()
         }
     }
@@ -225,7 +228,7 @@ struct TodoManagementView: View {
             var currentTodos = await TodoStore.shared.getTodos()
             if let index = currentTodos.firstIndex(where: { $0.id == todo.id }) {
                 currentTodos[index].title = newTitle
-                TodoStore.shared.saveTodos(currentTodos)
+                await TodoStore.shared.saveTodos(currentTodos)
                 refreshData()
             }
         }
