@@ -14,5 +14,10 @@
 - **Inline Interaction:** Mark tasks as complete or incomplete directly inside the widget view. Your data updates instantly without opening or switching to the main application.
 - **Intelligent Auto-Purge:** To keep your workspace clean, completed tasks remain visible until midnight. As soon as a new day begins, old history is automatically cleared out.
 
+### ⏱️ Countdown Timer
+
+- **Personalized Design:** Customize your countdown widget to match your mood or workspace. Choose from a curated palette of vibrant background colors, gradients, and custom emoji indicators.
+- **Glanceable Milestones:** Keep your most important deadlines, events, or holidays front and center. The widget dynamically updates in real-time so you always know exactly how many days, hours, or minutes remain.
+
 ## 💬 Feedback & Future Ideas
 **💡 Have a recommendation?** Please skip the code issues and post your architectural ideas, feature requests, or layout suggestions directly in the **Discussions** tab! We want to build the ultimate macOS desktop experience together with your input.
